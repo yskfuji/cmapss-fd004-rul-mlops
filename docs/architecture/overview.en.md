@@ -1,6 +1,6 @@
 # Architecture Overview
 
-This file is the English companion for the mixed-language architecture notes in `docs/architecture/overview.md`.
+This file is the English companion for the mixed-language architecture notes. 🇯🇵 Japanese/mixed version → [overview.md](overview.md)
 
 ## System intent
 

@@ -1,6 +1,6 @@
 # Architecture Overview
 
-Language note: this file preserves the original mixed-language architecture notes. A clean English companion is available in `docs/architecture/overview.en.md`.
+Language note: this file preserves the original mixed-language architecture notes. 🇬🇧 English companion → [overview.en.md](overview.en.md)
 
 CMAPSS FD004 RUL MLOps — システム全体図とコンポーネント設計
 

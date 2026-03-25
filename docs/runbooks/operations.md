@@ -1,6 +1,6 @@
 # RULFM Runbook
 
-Language note: this is the English-primary operations runbook. A Japanese companion is available in `docs/runbooks/operations.ja.md`.
+Language note: this is the English-primary operations runbook. 🇯🇵 Japanese companion → [operations.ja.md](operations.ja.md)
 
 ## Minimum paths first
 
@@ -177,3 +177,6 @@ to be installed. Ensemble adds ~5 min but typically reduces RMSE by 5–10%.
 | job success rate | queued jobs should converge to terminal state without manual cleanup |
 | drift severity counts | medium/high spikes should block promotion |
 | promotion approval rate | governance metric; low rates indicate poor candidate quality |
+
+---
+🇯🇵 日本語版: [operations.ja.md](operations.ja.md)

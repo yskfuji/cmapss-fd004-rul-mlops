@@ -1,6 +1,6 @@
 # RULFM Runbook
 
-このファイルは運用 runbook の日本語版です。英語の主文書は `docs/runbooks/operations.md` にあります。
+このファイルは運用 runbook の日本語版です。🇬🇧 English version → [operations.md](operations.md)
 
 ## 最小パス優先
 
@@ -140,3 +140,6 @@ PYTHONPATH=src python scripts/build_fd004_benchmark_summary.py
 | job success rate | queued job が手動 cleanup なしで収束すること |
 | drift severity counts | medium / high の増加は promotion を止める |
 | promotion approval rate | governance 指標。低い場合は candidate quality を疑う |
+
+---
+🇬🇧 English version: [operations.md](operations.md)

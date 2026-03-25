@@ -4,7 +4,7 @@
 
 NASA CMAPSS FD004 Remaining Useful Life 予測のための公開ポートフォリオ用リポジトリです。
 
-英語版の入口は `README.md` です。このファイルは日本語で、公開範囲、再現方法、運用面の要点を短く把握できるようにまとめています。
+英語版の入口は [README.md](README.md) です。このファイルは日本語で、公開範囲、再現方法、運用面の要点を短く把握できるようにまとめています。
 
 ## ポートフォリオ版
 
@@ -82,7 +82,10 @@ PYTHONPATH=src python scripts/build_fd004_benchmark_summary.py
 
 ## 日英ドキュメント導線
 
-- 英語 README: `README.md`
-- 日本語運用 runbook: `docs/runbooks/operations.ja.md`
-- 英語アーキテクチャ overview: `docs/architecture/overview.en.md`
-- governance / release / ADR 群: 既存ファイル内で EN/JA を併記
+| ドキュメント | 英語 | 日本語 |
+|---|---|---|
+| README | [README.md](README.md) | このファイル |
+| 運用 Runbook | [operations.md](docs/runbooks/operations.md) | [operations.ja.md](docs/runbooks/operations.ja.md) |
+| アーキテクチャ概要 | [overview.en.md](docs/architecture/overview.en.md) | [overview.md](docs/architecture/overview.md)（EN/JA 混在） |
+| ADR 群 | [docs/adr/](docs/adr/) | 各 ADR ファイル内に EN/JA 併記 |
+| governance / release | [docs/governance/](docs/governance/) / [release.md](docs/runbooks/release.md) | 各ファイル内に EN/JA 併記 |

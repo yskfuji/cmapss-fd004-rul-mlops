@@ -4,7 +4,7 @@
 
 Public portfolio repository for NASA CMAPSS FD004 Remaining Useful Life forecasting.
 
-Language guide: this file is the English landing page. A Japanese companion is available in `README.ja.md`.
+Language guide: this file is the English landing page. 🇯🇵 Japanese companion → [README.ja.md](README.ja.md)
 
 ## Portfolio release
 
@@ -365,3 +365,6 @@ This codebase is built toward a full MLOps package structure in staged iteration
 ## License
 
 MIT
+
+---
+🇯🇵 日本語版: [README.ja.md](README.ja.md)
