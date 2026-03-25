@@ -2,7 +2,7 @@
 
 **言語:** [英語版](overview.en.md) | 日英混在
 
-CMAPSS FD004 RUL MLOps — システム全体図とコンポーネント設計
+CMAPSS FD004 RUL MLOps のシステム全体像とコンポーネント設計をまとめた資料です。
 
 ---
 
@@ -64,16 +64,16 @@ CMAPSS FD004 RUL MLOps — システム全体図とコンポーネント設計
 | モジュール | 責務 |
 |---|---|
 | `app.py` | FastAPI アプリ生成、ルーター/サービスの組み立て、ランタイム依存の遅延初期化 |
-| `routers/` | HTTP レイヤー。リクエスト受け取り → サービス呼び出し → レスポンス返却のみ |
+| `routers/` | HTTP レイヤー。リクエストを受け取り、サービスを呼び出し、レスポンスを返します |
 | `services/` | ビジネスロジック。`runtime.py` の DI パターンで `app.py` への逆参照を排除 |
 | `services/runtime.py` | `*ServiceDeps` frozen dataclass でサービスへの依存を明示的に注入 |
 | `runtime_state.py` | `TRAINED_MODELS` / `JOB_STORE` の lazy state を app から分離した保持層 |
-| `request_audit.py` | API request 完了イベントを `enterprise.audit.AuditEvent` 形式で JSONL 出力 |
-| `request_policy.py` | `X-Tenant-Id` / `X-Connection-Type` と env 設定を使って tenant/network policy を API access path に適用 |
-| `request_approval.py` | train endpoint に対する two-person approval policy を `X-Approved-By` ヘッダで適用 |
-| `job_dispatcher.py` | Job 状態登録と実行ディスパッチを分離する queue-first enqueuer 境界。デフォルト public mode は worker queue、in-process adapter は互換用 |
-| `job_worker.py` | queued job を claim して実行する別プロセス worker |
-| `domain/stable_models.py` | 公開 stable forecast/backtest helper 群。`app.py` は互換ラッパーと composition root を担当 |
+| `request_audit.py` | API request の完了イベントを `enterprise.audit.AuditEvent` 形式で JSONL 出力します |
+| `request_policy.py` | `X-Tenant-Id` / `X-Connection-Type` と env 設定を使い、tenant/network policy を API access path に適用します |
+| `request_approval.py` | train endpoint に対する two-person approval policy を `X-Approved-By` ヘッダ経由で適用します |
+| `job_dispatcher.py` | Job 状態の登録と実行ディスパッチを分離する queue-first enqueuer 境界です。公開デフォルトは worker queue、in-process adapter は互換用です |
+| `job_worker.py` | queued job を claim して実行する別プロセスの worker です |
+| `domain/stable_models.py` | 公開 stable forecast/backtest helper 群です。`app.py` は互換ラッパーと composition root を担います |
 | `schemas/` | Pydantic モデル（全リクエスト/レスポンス型を `__init__.py` に集約） |
 | `errors.py` | `ApiError` 例外型。services → errors の一方向依存で循環を防止 |
 | `config.py` | `env_bool()`, `env_int()`, `env_path()` 環境変数ヘルパー |
@@ -94,17 +94,17 @@ CMAPSS FD004 RUL MLOps — システム全体図とコンポーネント設計
 
 | モジュール | 責務 |
 |---|---|
-| `drift_detector.py` | PSI（Population Stability Index）ベースの特徴量ドリフト検出。ベースライン要約の保存・読み込み・比較 |
+| `drift_detector.py` | PSI（Population Stability Index）ベースの特徴量ドリフト検出を担います。ベースライン要約の保存・読み込み・比較もここで扱います |
 
 ### `src/enterprise/`
 
 | モジュール | 責務 |
 |---|---|
-| `audit.py` | 共有 JSONL 監査イベント型。公開 API の request audit sink でも利用 |
-| `iam.py` | 承認・ブレークグラス判定の最小実装。two-person approval は `request_approval.py` 経由で `/v1/train` に接続 |
-| `network.py` | IP 許可リストと private 接続判定の最小実装。`request_policy.py` 経由で公開 API access path に接続 |
-| `tenancy.py` | tenant_id バリデーションの最小実装。`request_policy.py` 経由で公開 API access path に接続 |
-| `portability.py` | ポータビリティ要求向け監査イベント生成の最小実装 |
+| `audit.py` | 共有 JSONL 監査イベント型です。公開 API の request audit sink でも利用します |
+| `iam.py` | 承認・ブレークグラス判定の最小実装です。two-person approval は `request_approval.py` 経由で `/v1/train` に接続します |
+| `network.py` | IP 許可リストと private 接続判定の最小実装です。`request_policy.py` 経由で公開 API access path に接続します |
+| `tenancy.py` | tenant_id バリデーションの最小実装です。`request_policy.py` 経由で公開 API access path に接続します |
+| `portability.py` | ポータビリティ要求向けの監査イベントを生成する最小実装です |
 
 ---
 
@@ -198,10 +198,10 @@ routers/  ──▶  services/  ──▶  errors.py
               (injected from app.py at startup)
 ```
 
-**設計原則**: `services/` は `app.py` を逆参照しない。依存は常に上位レイヤーから下位レイヤーへの一方向。
-`errors.py` は最下層の独立モジュールで、どこからでも import 可能。
-stable forecast / backtest helper 群は `domain/stable_models.py` へ移され、`app.py` には互換ラッパーと composition root が残る。
-ただし学習系 helper や一部の large branch はまだ `app.py` に残っており、完全な分離は継続課題。
+**設計原則**: `services/` は `app.py` を逆参照しません。依存は常に上位レイヤーから下位レイヤーへの一方向です。
+`errors.py` は最下層の独立モジュールであり、どこからでも import できます。
+stable forecast / backtest helper 群は `domain/stable_models.py` に移してあり、`app.py` には互換ラッパーと composition root を残しています。
+一方で、学習系 helper や一部の large branch はまだ `app.py` に残っており、完全な分離は継続課題です。
 
 詳細設計の背景は [docs/adr/](../adr/) を参照。
 
