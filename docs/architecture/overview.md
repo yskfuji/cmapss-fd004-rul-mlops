@@ -1,6 +1,6 @@
 # Architecture Overview
 
-**Language:** [English](overview.en.md) | Japanese/mixed
+**言語:** [英語版](overview.en.md) | 日英混在
 
 CMAPSS FD004 RUL MLOps — システム全体図とコンポーネント設計
 

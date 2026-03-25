@@ -4,7 +4,7 @@
 
 NASA CMAPSS FD004 Remaining Useful Life 予測のための公開ポートフォリオ用リポジトリです。
 
-**言語:** [English](README.md) | 日本語
+**言語:** [英語](README.md) | 日本語
 
 ## ポートフォリオ版
 
@@ -73,7 +73,7 @@ PYTHONPATH=src python scripts/build_fd004_benchmark_summary.py
 
 ## 公開上の読み方
 
-このリポジトリは「すでに大規模本番運用されている SaaS」の証明ではなく、次を示す production-style reference implementation として読むのが正確です。
+このリポジトリは「すでに大規模本番運用されている SaaS」の証明ではなく、次を示す本番スタイルのリファレンス実装として読むのが正確です。
 
 - 再現可能な benchmark
 - API と非同期 job 面
