@@ -186,7 +186,11 @@ jobs:
           PYTHONPATH: src
           RULFM_MLFLOW_TRACKING_URI: file:${{ github.workspace }}/.mlruns-ci
           RULFM_MLFLOW_EXPERIMENT: ci-smoke
-        run: pytest tests/unit/test_mlflow_runs.py -k real_file_tracking_creates_mlflow_run -q
+        run: |
+          python -m pytest \
+            --override-ini="addopts=-q -p no:dash" \
+            tests/unit/test_mlflow_runs.py \
+            -k real_file_tracking_creates_mlflow_run -q
 
   benchmark:
     runs-on: ubuntu-latest
@@ -205,10 +209,10 @@ jobs:
       - name: Benchmark smoke
         env:
           PYTHONPATH: src
-          RULFM_BENCHMARK_STAGE: gbdt-only
-          RULFM_BENCHMARK_GBDT_PRESET: fast
-          RULFM_BENCHMARK_ENABLE_GBDT_ENSEMBLE: '0'
-        run: python scripts/build_fd004_benchmark_summary.py
+        run: |
+          python -m pytest \
+            --override-ini="addopts=-q -p no:dash" \
+            tests/unit/test_build_fd004_benchmark_summary.py -q
 
   benchmark-artifact-regression:
     runs-on: ubuntu-latest
@@ -227,7 +231,10 @@ jobs:
       - name: Benchmark artifact regression
         env:
           PYTHONPATH: src
-        run: pytest tests/regression/ -v
+        run: |
+          python -m pytest \
+            --override-ini="addopts=-q -p no:dash" \
+            tests/regression/ -v
 
   dvc-dry-run:
     runs-on: ubuntu-latest
@@ -243,8 +250,9 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements-lock.txt
+          pip install pathspec==0.12.1
       - name: Validate DVC pipeline graph
-        run: dvc repro --dry
+        run: python -m dvc repro --dry
 
   e2e:
     runs-on: ubuntu-latest
