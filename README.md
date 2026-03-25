@@ -34,6 +34,26 @@ If you only want the public benchmark path, read these first:
 - release discipline in `docs/runbooks/release.md`
 - ownership and security exception controls in `docs/governance/`
 
+## Quality Gates
+
+This repository includes CI, CD, and multiple test layers.
+
+- CI: `.github/workflows/ci-stable.yml`
+    - lint, security audit, typecheck, stable tests, PostgreSQL compose integration, benchmark checks, DVC dry-run, and e2e follow-up jobs
+- Experimental CI: `.github/workflows/ci-experimental.yml`
+    - experimental torch and hybrid model tests with focused coverage gates
+- CD: `.github/workflows/cd.yml`
+    - GHCR image build/publish, Cloud Run deploy, and post-deploy smoke checks
+- Test suites:
+    - unit: `tests/unit/`
+    - integration: `tests/integration/`
+    - monitoring: `tests/monitoring/`
+    - regression: `tests/regression/`
+    - frontend: `tests/frontend/`
+    - e2e: `tests/e2e/`
+
+If you want a quick proof point, the CI badge at the top of this README points to the stable workflow, and the test directories above map directly to the layers exercised in GitHub Actions.
+
 ## What this project demonstrates
 
 | Area | Public implementation |

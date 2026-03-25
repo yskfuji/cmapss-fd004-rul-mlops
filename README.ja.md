@@ -23,6 +23,26 @@ NASA CMAPSS FD004 の Remaining Useful Life 予測を題材にした、公開ポ
 
 このリポジトリの主役は、あくまで「公開ベンチマークと API」です。OIDC、tenant policy、audit logging、job orchestration は、それらを支える control plane をどのように設計するかを示す補助的な実装として位置づけています。
 
+## 品質保証の構成
+
+このリポジトリには、CI、CD、そして複数レイヤーのテストが含まれています。
+
+- CI: `.github/workflows/ci-stable.yml`
+  - lint、security audit、typecheck、stable test、PostgreSQL compose integration、benchmark check、DVC dry-run、e2e へ続く後段ジョブを実行します
+- Experimental CI: `.github/workflows/ci-experimental.yml`
+  - torch / hybrid 系の experimental model 向けテストと、対象を絞った coverage gate を実行します
+- CD: `.github/workflows/cd.yml`
+  - GHCR への image build / publish、Cloud Run への deploy、deploy 後の smoke check を実行します
+- テストスイート:
+  - unit: `tests/unit/`
+  - integration: `tests/integration/`
+  - monitoring: `tests/monitoring/`
+  - regression: `tests/regression/`
+  - frontend: `tests/frontend/`
+  - e2e: `tests/e2e/`
+
+手早く確認したい場合は、この README 冒頭の CI バッジから stable workflow を見るのが最短です。上に挙げた各テストディレクトリは、そのまま GitHub Actions で実行している検証レイヤーに対応しています。
+
 ## 公開ベンチマークの要点
 
 基準となる artifact は `src/forecasting_api/data/fd004_benchmark_summary.json` としてコミットしています。
