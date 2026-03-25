@@ -1,6 +1,7 @@
 import math
 
 import pytest
+
 from monitoring.drift_detector import DriftDetector
 
 

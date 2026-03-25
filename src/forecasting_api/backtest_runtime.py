@@ -1,17 +1,16 @@
 from __future__ import annotations
 
+from collections.abc import Callable
 from contextlib import AbstractContextManager
-from datetime import timedelta
 from pathlib import Path
-from typing import Any, Callable
+from typing import Any
 
 from forecasting_api.domain import stable_models
 from forecasting_api.errors import ApiError
 from forecasting_api.schemas import BacktestRequest, BacktestResponse
 from forecasting_api.services.runtime import BacktestServiceDeps, TorchBacktestFn
 
-from . import hybrid_runtime
-from . import training_helpers
+from . import hybrid_runtime, training_helpers
 
 
 def build_backtest_service_deps(

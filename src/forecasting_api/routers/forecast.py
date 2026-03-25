@@ -4,6 +4,7 @@ from collections.abc import Callable
 from typing import Any
 
 from fastapi import APIRouter, Depends
+
 from forecasting_api.schemas import ForecastRequest, ForecastResponse
 
 

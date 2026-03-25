@@ -1,7 +1,8 @@
-from contextlib import nullcontext
 import sqlite3
+from contextlib import nullcontext
 
 from fastapi.testclient import TestClient
+
 from forecasting_api import app as app_module
 from forecasting_api.app import create_app
 from forecasting_api.job_worker import process_next_job_once

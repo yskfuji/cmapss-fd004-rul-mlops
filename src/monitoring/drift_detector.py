@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import Any
 
 import numpy as np
+
 from forecasting_api.file_store import load_json, update_json_file
 
 
@@ -151,7 +152,11 @@ class DriftDetector:
             raise ValueError(
                 "baseline and candidate probability bins must have identical lengths"
             )
-        for baseline_ratio, candidate_ratio in zip(baseline_probabilities, candidate_probabilities):
+        for baseline_ratio, candidate_ratio in zip(
+            baseline_probabilities,
+            candidate_probabilities,
+            strict=True,
+        ):
             baseline_safe = max(float(baseline_ratio), epsilon)
             candidate_safe = max(float(candidate_ratio), epsilon)
             psi += (candidate_safe - baseline_safe) * math.log(

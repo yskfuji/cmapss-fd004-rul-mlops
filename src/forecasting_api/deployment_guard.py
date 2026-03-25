@@ -21,15 +21,21 @@ def validate_cloud_run_runtime(
         return
     if job_execution_backend == "inprocess":
         raise RuntimeError(
-            "Cloud Run deployment requires RULFM_JOB_EXECUTION_BACKEND=worker; inprocess jobs are not durable"
+            "Cloud Run deployment requires "
+            "RULFM_JOB_EXECUTION_BACKEND=worker; "
+            "inprocess jobs are not durable"
         )
     if job_store_backend != "postgres" or not job_store_postgres_dsn:
         raise RuntimeError(
-            "Cloud Run deployment requires RULFM_JOB_STORE_BACKEND=postgres and RULFM_JOB_STORE_POSTGRES_DSN"
+            "Cloud Run deployment requires "
+            "RULFM_JOB_STORE_BACKEND=postgres and "
+            "RULFM_JOB_STORE_POSTGRES_DSN"
         )
     if model_registry_backend != "postgres" or not model_registry_postgres_dsn:
         raise RuntimeError(
-            "Cloud Run deployment requires RULFM_MODEL_REGISTRY_BACKEND=postgres and RULFM_MODEL_REGISTRY_POSTGRES_DSN"
+            "Cloud Run deployment requires "
+            "RULFM_MODEL_REGISTRY_BACKEND=postgres and "
+            "RULFM_MODEL_REGISTRY_POSTGRES_DSN"
         )
 
     default_like_roots = [
@@ -53,5 +59,7 @@ def validate_cloud_run_runtime(
         normalized = target.resolve()
         if any(str(normalized).startswith(str(root)) for root in default_like_roots):
             raise RuntimeError(
-                f"Cloud Run deployment requires {env_name} to point to persistent external storage, not packaged app data"
+                "Cloud Run deployment requires "
+                f"{env_name} to point to persistent external storage, "
+                "not packaged app data"
             )

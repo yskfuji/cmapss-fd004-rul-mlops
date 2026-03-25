@@ -6,6 +6,7 @@ from datetime import timedelta
 from typing import Any, Literal, cast
 
 import numpy as np
+
 from forecasting_api.errors import ApiError
 from forecasting_api.schemas import (
     BacktestRequest,
@@ -33,7 +34,7 @@ def _as_float_list(value: Any) -> list[float]:
     return [
         float(item)
         for item in _as_list(value)
-        if isinstance(item, (int, float)) and math.isfinite(float(item))
+        if isinstance(item, int | float) and math.isfinite(float(item))
     ]
 
 
@@ -44,7 +45,7 @@ def predict_hgb_next(
     for row in context_records:
         x_dict = _as_dict(row.get("x"))
         features.extend(
-            float(x_dict.get(key, 0.0)) if isinstance(x_dict.get(key, 0.0), (int, float)) else 0.0
+            float(x_dict.get(key, 0.0)) if isinstance(x_dict.get(key, 0.0), int | float) else 0.0
             for key in feature_keys
         )
     x_row = np.asarray([features], dtype=float)
@@ -104,7 +105,7 @@ def ridge_lags_fit_series(ys: list[float], *, lag_k: int) -> dict[str, Any]:
         list[Any],
         np.asarray(y[tail_start:], dtype=float).reshape(-1).tolist(),
     )
-    abs_err = [float(abs(float(p) - float(t))) for p, t in zip(preds, tail_targets)]
+    abs_err = [float(abs(float(p) - float(t))) for p, t in zip(preds, tail_targets, strict=False)]
     coef_values = cast(
         list[Any],
         np.asarray(getattr(model, "coef_", []), dtype=float).reshape(-1).tolist(),
@@ -115,7 +116,7 @@ def ridge_lags_fit_series(ys: list[float], *, lag_k: int) -> dict[str, Any]:
         "coef": [float(c) for c in coef_values],
         "intercept": float(getattr(model, "intercept_", 0.0)),
         "residuals": [
-            float(e) for e in abs_err if isinstance(e, (int, float)) and math.isfinite(float(e))
+            float(e) for e in abs_err if isinstance(e, int | float) and math.isfinite(float(e))
         ],
     }
 
@@ -124,12 +125,12 @@ def ridge_lags_forecast_series(
     state: dict[str, Any], *, last_values: list[float], horizon: int
 ) -> list[float]:
     k = int(state.get("lag_k") or 1)
-    coef = [float(value) for value in _as_list(state.get("coef")) if isinstance(value, (int, float))]
+    coef = [float(value) for value in _as_list(state.get("coef")) if isinstance(value, int | float)]
     intercept = float(state.get("intercept") or 0.0)
     hist = [
         float(v)
         for v in (last_values or [])
-        if isinstance(v, (int, float)) and math.isfinite(float(v))
+        if isinstance(v, int | float) and math.isfinite(float(v))
     ]
     if len(hist) < k:
         pad = hist[-1] if hist else intercept
@@ -151,7 +152,7 @@ def ridge_lags_forecast_series(
 
 
 def quantile_nearest_rank(values: list[float], q: float) -> float:
-    xs = sorted(float(v) for v in values if isinstance(v, (int, float)) and math.isfinite(float(v)))
+    xs = sorted(float(v) for v in values if isinstance(v, int | float) and math.isfinite(float(v)))
     if not xs:
         return 0.0
     qq = 0.0 if q <= 0 else 1.0 if q >= 1 else float(q)
@@ -160,7 +161,7 @@ def quantile_nearest_rank(values: list[float], q: float) -> float:
 
 
 def build_residuals_evidence(values: list[float]) -> dict[str, Any] | None:
-    xs = [float(v) for v in values if isinstance(v, (int, float)) and math.isfinite(float(v))]
+    xs = [float(v) for v in values if isinstance(v, int | float) and math.isfinite(float(v))]
     if not xs:
         return None
     xs = xs[-500:]
@@ -259,13 +260,15 @@ def naive_forecast(req: ForecastRequest, step: timedelta) -> ForecastResponse:
     max_dev = 0.0
     if req.quantiles:
         quantiles = [
-            float(q) for q in req.quantiles if isinstance(q, (int, float)) and 0.0 < float(q) < 1.0
+            float(q) for q in req.quantiles if isinstance(q, int | float) and 0.0 < float(q) < 1.0
         ]
         max_dev = max((abs(q - 0.5) for q in quantiles), default=0.0)
     levels: list[float] | None = None
     if req.level:
         levels = [
-            float(l) for l in req.level if isinstance(l, (int, float)) and 0.0 < float(l) <= 100.0
+            float(level)
+            for level in req.level
+            if isinstance(level, int | float) and 0.0 < float(level) <= 100.0
         ]
 
     qhat_for_quantiles = None
@@ -284,8 +287,14 @@ def naive_forecast(req: ForecastRequest, step: timedelta) -> ForecastResponse:
     if not has_calib:
         warnings.append(
             _bi(
-                f"CALIB01: insufficient history for split conformal (n_residuals={len(residuals)} < {calib_min}).",
-                f"CALIB01: split conformal の履歴が不足しています（n_residuals={len(residuals)} < {calib_min}）。",
+                (
+                    "CALIB01: insufficient history for split conformal "
+                    f"(n_residuals={len(residuals)} < {calib_min})."
+                ),
+                (
+                    "CALIB01: split conformal の履歴が不足しています"
+                    f"（n_residuals={len(residuals)} < {calib_min}）。"
+                ),
             )
         )
 
@@ -403,7 +412,7 @@ def forecast_with_trained_model(
         by_series.setdefault(record.series_id, []).append(record)
 
     model_state = _as_dict(trained.get("state")) or trained
-    algo = str((trained.get("algo") or model_state.get("algo") or "")).strip().lower()
+    algo = str(trained.get("algo") or model_state.get("algo") or "").strip().lower()
     series_state = _as_dict(model_state.get("series"))
     residuals = _as_float_list(model_state.get("pooled_residuals"))
     calib_min = 12
@@ -412,13 +421,15 @@ def forecast_with_trained_model(
     max_dev = 0.0
     if req.quantiles:
         quantiles = [
-            float(q) for q in req.quantiles if isinstance(q, (int, float)) and 0.0 < float(q) < 1.0
+            float(q) for q in req.quantiles if isinstance(q, int | float) and 0.0 < float(q) < 1.0
         ]
         max_dev = max((abs(q - 0.5) for q in quantiles), default=0.0)
     levels: list[float] | None = None
     if req.level:
         levels = [
-            float(l) for l in req.level if isinstance(l, (int, float)) and 0.0 < float(l) <= 100.0
+            float(level)
+            for level in req.level
+            if isinstance(level, int | float) and 0.0 < float(level) <= 100.0
         ]
     qhat_for_quantiles = None
     qhat_by_level: dict[str, float] | None = None
@@ -445,8 +456,14 @@ def forecast_with_trained_model(
     if not has_calib:
         warnings.append(
             _bi(
-                f"CALIB01: insufficient residuals for split conformal (n={len(residuals)} < {calib_min}).",
-                f"CALIB01: split conformal の残差が不足しています（n={len(residuals)} < {calib_min}）。",
+                (
+                    "CALIB01: insufficient residuals for split conformal "
+                    f"(n={len(residuals)} < {calib_min})."
+                ),
+                (
+                    "CALIB01: split conformal の残差が不足しています"
+                    f"（n={len(residuals)} < {calib_min}）。"
+                ),
             )
         )
     calibration: dict[str, Any] | None = None
@@ -506,7 +523,9 @@ def forecast_with_trained_model(
             elif has_calib and qhat_by_level:
                 uncertainty = 0.0
             else:
-                uncertainty = safe_std_fn(_as_float_list(state.get("residuals"))) * math.sqrt(horizon_idx)
+                uncertainty = safe_std_fn(_as_float_list(state.get("residuals"))) * math.sqrt(
+                    horizon_idx
+                )
             if quantiles:
                 q_map = {}
                 denom = 2.0 * max_dev if max_dev > 0 else 1.0
@@ -587,13 +606,15 @@ def forecast_with_gbdt_model(
     max_dev = 0.0
     if req.quantiles:
         quantiles = [
-            float(q) for q in req.quantiles if isinstance(q, (int, float)) and 0.0 < float(q) < 1.0
+            float(q) for q in req.quantiles if isinstance(q, int | float) and 0.0 < float(q) < 1.0
         ]
         max_dev = max((abs(q - 0.5) for q in quantiles), default=0.0)
     levels: list[float] | None = None
     if req.level:
         levels = [
-            float(l) for l in req.level if isinstance(l, (int, float)) and 0.0 < float(l) <= 100.0
+            float(level)
+            for level in req.level
+            if isinstance(level, int | float) and 0.0 < float(level) <= 100.0
         ]
     qhat_for_quantiles = None
     qhat_by_level: dict[str, float] | None = None
@@ -636,8 +657,14 @@ def forecast_with_gbdt_model(
     if not has_calib:
         warnings.append(
             _bi(
-                f"CALIB01: insufficient residuals for split conformal (n={len(residuals)} < {calib_min}).",
-                f"CALIB01: split conformal の残差が不足しています（n={len(residuals)} < {calib_min}）。",
+                (
+                    "CALIB01: insufficient residuals for split conformal "
+                    f"(n={len(residuals)} < {calib_min})."
+                ),
+                (
+                    "CALIB01: split conformal の残差が不足しています"
+                    f"（n={len(residuals)} < {calib_min}）。"
+                ),
             )
         )
     by_series: dict[str, list[TimeSeriesRecord]] = {}
@@ -658,7 +685,9 @@ def forecast_with_gbdt_model(
                 if context_records
                 else {"timestamp": last_ts.isoformat(), "y": 0.0, "x": {}}
             )
-            context_records = [dict(pad) for _ in range(need - len(context_records))] + context_records
+            context_records = [
+                dict(pad) for _ in range(need - len(context_records))
+            ] + context_records
         last_x = _as_dict(context_records[-1].get("x")) if context_records else {}
         for horizon_idx in range(1, req.horizon + 1):
             point, _low, _high = predict_hgb_next_fn(
@@ -706,7 +735,9 @@ def forecast_with_gbdt_model(
                     explanation=None,
                 )
             )
-            context_records.append({"timestamp": ts.isoformat(), "y": float(point), "x": dict(last_x)})
+            context_records.append(
+                {"timestamp": ts.isoformat(), "y": float(point), "x": dict(last_x)}
+            )
     return ForecastResponse(
         forecasts=forecasts,
         warnings=warnings or None,
@@ -726,7 +757,7 @@ def metric_value(
 ) -> float:
     if not y_true or len(y_true) != len(y_pred):
         return 0.0
-    errs = [pred - truth for truth, pred in zip(y_true, y_pred)]
+    errs = [pred - truth for truth, pred in zip(y_true, y_pred, strict=False)]
     if metric == "mae":
         return float(sum(abs(err) for err in errs) / len(errs))
     if metric == "rmse":
@@ -737,11 +768,13 @@ def metric_value(
             total += math.exp((-err) / 13.0) - 1.0 if err < 0 else math.exp(err / 10.0) - 1.0
         return float(total)
     if metric == "mape":
-        fracs = [abs(err) / abs(truth) for truth, err in zip(y_true, errs) if truth != 0]
+        fracs = [
+            abs(err) / abs(truth) for truth, err in zip(y_true, errs, strict=False) if truth != 0
+        ]
         return float(sum(fracs) / len(fracs)) if fracs else 0.0
     if metric == "smape":
         fracs = []
-        for truth, pred in zip(y_true, y_pred):
+        for truth, pred in zip(y_true, y_pred, strict=False):
             denom = abs(truth) + abs(pred)
             if denom == 0:
                 continue
@@ -806,11 +839,15 @@ def naive_backtest(req: BacktestRequest) -> BacktestResponse:
         if not y_true:
             continue
         value = metric_value(req.metric, y_true=y_true, y_pred=y_pred, train_y=train_y)
-        per_series_entries.append({"series_id": series_id, "metric": req.metric, "value": float(value)})
+        per_series_entries.append(
+            {"series_id": series_id, "metric": req.metric, "value": float(value)}
+        )
         overall_true.extend(y_true)
         overall_pred.extend(y_pred)
         overall_train_y.extend(train_y)
-    overall = metric_value(req.metric, y_true=overall_true, y_pred=overall_pred, train_y=overall_train_y)
+    overall = metric_value(
+        req.metric, y_true=overall_true, y_pred=overall_pred, train_y=overall_train_y
+    )
     by_h_entries = [
         {
             "horizon": horizon_idx,
@@ -934,11 +971,15 @@ def ridge_lags_backtest(
         if not y_true:
             continue
         value = metric_value_fn(req.metric, y_true=y_true, y_pred=y_pred, train_y=train_y)
-        per_series_entries.append({"series_id": series_id, "metric": req.metric, "value": float(value)})
+        per_series_entries.append(
+            {"series_id": series_id, "metric": req.metric, "value": float(value)}
+        )
         overall_true.extend(y_true)
         overall_pred.extend(y_pred)
         overall_train_y.extend(train_y)
-    overall = metric_value_fn(req.metric, y_true=overall_true, y_pred=overall_pred, train_y=overall_train_y)
+    overall = metric_value_fn(
+        req.metric, y_true=overall_true, y_pred=overall_pred, train_y=overall_train_y
+    )
     by_h_entries = [
         {
             "horizon": horizon_idx,
@@ -1054,7 +1095,9 @@ def gbdt_backtest(
                         "x": dict(train_rows[-1].x or {}),
                     }
                 )
-                context_records = [dict(pad) for _ in range(need - len(context_records))] + context_records
+                context_records = [
+                    dict(pad) for _ in range(need - len(context_records))
+                ] + context_records
             fold_preds: list[float] = []
             for actual_row in actual_rows:
                 pred, _low, _high = predict_hgb_next_fn(
@@ -1075,7 +1118,9 @@ def gbdt_backtest(
             y_true.extend(actual)
             y_pred.extend(fold_preds)
             train_y.extend(train)
-            for horizon_idx, (truth, pred) in enumerate(zip(actual, fold_preds), start=1):
+            for horizon_idx, (truth, pred) in enumerate(
+                zip(actual, fold_preds, strict=False), start=1
+            ):
                 by_h_true[horizon_idx].append(float(truth))
                 by_h_pred[horizon_idx].append(float(pred))
                 by_h_train[horizon_idx].extend(train)
@@ -1084,14 +1129,18 @@ def gbdt_backtest(
                 by_f_train[fold_idx + 1].extend(train)
         if not y_true:
             continue
-        per_series_metric = metric_value_fn(req.metric, y_true=y_true, y_pred=y_pred, train_y=train_y)
+        per_series_metric = metric_value_fn(
+            req.metric, y_true=y_true, y_pred=y_pred, train_y=train_y
+        )
         per_series_entries.append(
             {"series_id": series_id, "metric": req.metric, "value": float(per_series_metric)}
         )
         overall_true.extend(y_true)
         overall_pred.extend(y_pred)
         overall_train_y.extend(train_y)
-    overall = metric_value_fn(req.metric, y_true=overall_true, y_pred=overall_pred, train_y=overall_train_y)
+    overall = metric_value_fn(
+        req.metric, y_true=overall_true, y_pred=overall_pred, train_y=overall_train_y
+    )
     by_h_entries = [
         {
             "horizon": horizon_idx,

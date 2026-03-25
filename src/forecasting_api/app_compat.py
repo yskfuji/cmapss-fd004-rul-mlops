@@ -1,8 +1,9 @@
 from __future__ import annotations
 
+from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Callable
+from typing import Any
 
 from . import app_support
 from .config import env_first, env_path
@@ -11,8 +12,8 @@ from .schemas import (
     BacktestResponse,
     ErrorDetails,
     ErrorResponse,
-    ForecastRequest,
     ForecastPoint,
+    ForecastRequest,
     JobCreateRequest,
     JobCreateResponse,
     JobStatusResponse,
@@ -20,7 +21,6 @@ from .schemas import (
     TrainRequest,
     TrainResponse,
 )
-
 
 bi = app_support.bi
 as_dict = app_support.as_dict
@@ -54,18 +54,32 @@ def bind_runtime_accessors(
     logger: Callable[[], Any],
 ) -> RuntimeCompatBindings:
     return RuntimeCompatBindings(
-        model_artifact_dir=lambda model_id: app_support.model_artifact_dir(model_artifacts_root(), model_id),
-        artifact_relpath=lambda model_id, filename: app_support.artifact_relpath(model_id, filename),
-        artifact_abspath=lambda relpath: app_support.artifact_abspath(model_artifacts_root(), relpath),
+        model_artifact_dir=lambda model_id: app_support.model_artifact_dir(
+            model_artifacts_root(),
+            model_id,
+        ),
+        artifact_relpath=lambda model_id, filename: app_support.artifact_relpath(
+            model_id, filename
+        ),
+        artifact_abspath=lambda relpath: app_support.artifact_abspath(
+            model_artifacts_root(),
+            relpath,
+        ),
         write_json=lambda path, payload: app_support.write_json(path, payload),
         read_json=lambda path: app_support.read_json(path),
-        load_models_from_store=lambda: app_support.load_models_from_store(trained_models_store_path()),
-        save_models_to_store=lambda models: app_support.save_models_to_store(trained_models_store_path(), models),
+        load_models_from_store=lambda: app_support.load_models_from_store(
+            trained_models_store_path()
+        ),
+        save_models_to_store=lambda models: app_support.save_models_to_store(
+            trained_models_store_path(),
+            models,
+        ),
         load_fd004_benchmark_summary=lambda: app_support.load_fd004_benchmark_summary(
             fd004_benchmark_summary_path(),
             logger=logger(),
         ),
     )
+
 
 __all__ = [
     "BacktestRequest",

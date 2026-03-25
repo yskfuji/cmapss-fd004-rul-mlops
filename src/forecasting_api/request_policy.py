@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Any, Literal
+from typing import Any
 
 from fastapi import Request
 
@@ -121,7 +121,10 @@ def enforce_request_policy(
                 error_code="A15",
                 message="network policy により拒否されました",
                 details={
-                    "error": f"network access denied for connection_type={resolved_connection_type}",
+                    "error": (
+                        "network access denied for "
+                        f"connection_type={resolved_connection_type}"
+                    ),
                     "next_action": "allowlist と private connectivity 設定を確認してください",
                 },
             )

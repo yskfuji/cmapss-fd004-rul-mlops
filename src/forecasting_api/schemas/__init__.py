@@ -32,7 +32,10 @@ class ErrorDetails(BaseModel):
     )
     algo: str | None = Field(
         None,
-        description=_bi("Algorithm identifier related to the error.", "エラー対象のアルゴリズム識別子。"),
+        description=_bi(
+            "Algorithm identifier related to the error.",
+            "エラー対象のアルゴリズム識別子。",
+        ),
     )
     available_profiles: list[str] | None = Field(
         None,
@@ -52,7 +55,10 @@ class ErrorDetails(BaseModel):
     )
     max_bytes: int | None = Field(
         None,
-        description=_bi("Maximum supported request size in bytes.", "許容される最大リクエストサイズ。"),
+        description=_bi(
+            "Maximum supported request size in bytes.",
+            "許容される最大リクエストサイズ。",
+        ),
     )
     limit: int | None = Field(
         None,
@@ -365,8 +371,14 @@ class TrainRequest(BaseModel):
     algo: str | None = Field(
         None,
         description=_bi(
-            "Training algorithm (optional). Overrides base_model when set (e.g., ridge_lags_v1, gbdt_hgb_v1, naive).",
-            "学習アルゴリズム（任意）。指定時は base_model より優先（例: ridge_lags_v1, gbdt_hgb_v1, naive）。",
+            (
+                "Training algorithm (optional). Overrides base_model when set "
+                "(e.g., ridge_lags_v1, gbdt_hgb_v1, naive)."
+            ),
+            (
+                "学習アルゴリズム（任意）。指定時は base_model より優先"
+                "（例: ridge_lags_v1, gbdt_hgb_v1, naive）。"
+            ),
         ),
     )
 

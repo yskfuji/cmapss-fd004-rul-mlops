@@ -99,7 +99,7 @@ def append_request_audit_event(
         payload = json.loads(to_jsonl(event))
         details = payload.get("details") if isinstance(payload.get("details"), dict) else {}
         entry_hash = sha256(
-            f"{prev_hash or ''}\n{_canonical_hash_payload(payload)}".encode("utf-8")
+            f"{prev_hash or ''}\n{_canonical_hash_payload(payload)}".encode()
         ).hexdigest()
         details["entry_hash"] = entry_hash
         payload["details"] = details

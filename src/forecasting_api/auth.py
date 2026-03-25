@@ -126,7 +126,11 @@ def require_api_key(
             error_code="A12",
             message="APIキーが無効です",
             details={
-                "next_action": "RULFM_FORECASTING_API_KEY または RULFM_FORECASTING_API_BEARER_TOKEN または OIDC 環境変数を設定してください"
+                "next_action": (
+                    "RULFM_FORECASTING_API_KEY または "
+                    "RULFM_FORECASTING_API_BEARER_TOKEN または "
+                    "OIDC 環境変数を設定してください"
+                )
             },
         )
 
@@ -136,7 +140,11 @@ def require_api_key(
         if scheme.strip().lower() == "bearer":
             bearer_token = token.strip() or None
 
-    if expected is not None and x_api_key is not None and secrets.compare_digest(str(x_api_key), str(expected)):
+    if (
+        expected is not None
+        and x_api_key is not None
+        and secrets.compare_digest(str(x_api_key), str(expected))
+    ):
         request.state.auth_method = "x-api-key"
         request.state.auth_claims = {}
         return
@@ -167,7 +175,10 @@ def require_api_key(
         error_code="A12",
         message="APIキーが無効です",
         details={
-            "next_action": "X-API-Key または Authorization: Bearer または OIDC 設定を確認してください"
+            "next_action": (
+                "X-API-Key または Authorization: Bearer または "
+                "OIDC 設定を確認してください"
+            )
         },
     )
 

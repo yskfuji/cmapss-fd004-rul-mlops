@@ -61,7 +61,10 @@ def assert_model_algo_available(raw: str | None, *, api_error_cls: type[Exceptio
             message="experimental algorithm は公開APIでは無効です",
             details={
                 "algo": normalized,
-                "next_action": "RULFM_ENABLE_EXPERIMENTAL_MODELS=1 を設定するか、gbdt_hgb_v1 / ridge_lags_v1 / naive を使用してください",
+                "next_action": (
+                    "RULFM_ENABLE_EXPERIMENTAL_MODELS=1 を設定するか、"
+                    "gbdt_hgb_v1 / ridge_lags_v1 / naive を使用してください"
+                ),
             },
         )
     return normalized
@@ -98,7 +101,7 @@ def select_series_feature_keys(
             for key, value in _as_dict(row.get("x")).items():
                 if not isinstance(key, str):
                     continue
-                if not isinstance(value, (int, float)) or not math.isfinite(float(value)):
+                if not isinstance(value, int | float) or not math.isfinite(float(value)):
                     continue
                 if key in {"cycle", "rul", "y"}:
                     continue
@@ -156,7 +159,7 @@ def build_hgb_supervised_rows(
                 x_dict = _as_dict(ctx_row.get("x"))
                 features.extend(
                     float(x_dict.get(key, 0.0))
-                    if isinstance(x_dict.get(key, 0.0), (int, float))
+                    if isinstance(x_dict.get(key, 0.0), int | float)
                     else 0.0
                     for key in feature_keys
                 )
@@ -273,7 +276,9 @@ def fit_hgb_forecaster(
         scoring="neg_root_mean_squared_error",
     )
     grouped_importance: dict[str, list[float]] = {}
-    importance_values = np.asarray(raw_importance.importances_mean, dtype=float).reshape(-1).tolist()
+    importance_values = (
+        np.asarray(raw_importance.importances_mean, dtype=float).reshape(-1).tolist()
+    )
     for idx, score in enumerate(importance_values):
         key = feature_keys[idx % len(feature_keys)] if feature_keys else str(idx)
         grouped_importance.setdefault(key, []).append(abs(float(score)))
@@ -286,7 +291,7 @@ def fit_hgb_forecaster(
             float(_as_dict(row.get("x")).get(key, 0.0))
             for rows in records_by_series.values()
             for row in rows
-            if isinstance(_as_dict(row.get("x")).get(key), (int, float))
+            if isinstance(_as_dict(row.get("x")).get(key), int | float)
         ]
         baseline_map[key] = float(np.median(np.asarray(values, dtype=float))) if values else 0.0
     valid_rows = [
@@ -332,17 +337,17 @@ def hybrid_condition_cluster_key(record: dict[str, Any]) -> str:
     x_dict = _as_dict(record.get("x"))
     op_value = (
         float(x_dict.get("op_setting_1", 0.0))
-        if isinstance(x_dict.get("op_setting_1"), (int, float))
+        if isinstance(x_dict.get("op_setting_1"), int | float)
         else 0.0
     )
     sensor_1 = (
         float(x_dict.get("sensor_1", 0.0))
-        if isinstance(x_dict.get("sensor_1"), (int, float))
+        if isinstance(x_dict.get("sensor_1"), int | float)
         else 0.0
     )
     sensor_2 = (
         float(x_dict.get("sensor_2", 0.0))
-        if isinstance(x_dict.get("sensor_2"), (int, float))
+        if isinstance(x_dict.get("sensor_2"), int | float)
         else 0.0
     )
     op_bucket = int(round(op_value))
@@ -351,7 +356,12 @@ def hybrid_condition_cluster_key(record: dict[str, Any]) -> str:
     return f"{op_bucket}|{s1_bucket}|{s2_bucket}"
 
 
-def hybrid_interval_overlap_ratio(g_lower: float, g_upper: float, a_lower: float, a_upper: float) -> float:
+def hybrid_interval_overlap_ratio(
+    g_lower: float,
+    g_upper: float,
+    a_lower: float,
+    a_upper: float,
+) -> float:
     return interval_overlap_ratio(g_lower, g_upper, a_lower, a_upper)
 
 
@@ -418,15 +428,40 @@ def hybrid_metrics_from_outputs(outputs: dict[str, list[float]]) -> dict[str, fl
     y_pred = [float(v) for v in outputs.get("y_pred") or []]
     lower = [float(v) for v in outputs.get("lower") or []]
     upper = [float(v) for v in outputs.get("upper") or []]
-    if not y_true or len(y_true) != len(y_pred) or len(lower) != len(y_pred) or len(upper) != len(y_pred):
-        return {"rmse": float("nan"), "nasa_score": float("nan"), "cov90": float("nan"), "width90": float("nan")}
-    rmse = float(math.sqrt(sum((pred - truth) ** 2 for truth, pred in zip(y_true, y_pred)) / len(y_true)))
+    if (
+        not y_true
+        or len(y_true) != len(y_pred)
+        or len(lower) != len(y_pred)
+        or len(upper) != len(y_pred)
+    ):
+        return {
+            "rmse": float("nan"),
+            "nasa_score": float("nan"),
+            "cov90": float("nan"),
+            "width90": float("nan"),
+        }
+    rmse = float(
+        math.sqrt(
+            sum((pred - truth) ** 2 for truth, pred in zip(y_true, y_pred, strict=True))
+            / len(y_true)
+        )
+    )
     nasa_score = 0.0
-    for truth, pred in zip(y_true, y_pred):
+    for truth, pred in zip(y_true, y_pred, strict=True):
         err = float(pred) - float(truth)
         nasa_score += math.exp((-err) / 13.0) - 1.0 if err < 0 else math.exp(err / 10.0) - 1.0
-    cov = float(sum(1 for truth, lo, hi in zip(y_true, lower, upper) if float(lo) <= float(truth) <= float(hi)) / len(y_true))
-    width = float(sum(max(0.0, float(hi) - float(lo)) for lo, hi in zip(lower, upper)) / len(lower))
+    cov = float(
+        sum(
+            1
+            for truth, lo, hi in zip(y_true, lower, upper, strict=True)
+            if float(lo) <= float(truth) <= float(hi)
+        )
+        / len(y_true)
+    )
+    width = float(
+        sum(max(0.0, float(hi) - float(lo)) for lo, hi in zip(lower, upper, strict=True))
+        / len(lower)
+    )
     return {"rmse": rmse, "nasa_score": nasa_score, "cov90": cov, "width90": width}
 
 
@@ -445,7 +480,9 @@ def hybrid_soft_gate_candidate_rank(
     )
     feasible = 0.0 if coverage_shortfall <= 0.0 else 1.0
     point_objective = 0.25 * max(float(point_metrics.get("rmse") or float("inf")), 0.0)
-    point_objective += 1.0 * math.log1p(max(0.0, float(point_metrics.get("nasa_score") or float("inf"))))
+    point_objective += 1.0 * math.log1p(
+        max(0.0, float(point_metrics.get("nasa_score") or float("inf")))
+    )
     return (
         feasible,
         coverage_shortfall,
@@ -480,7 +517,11 @@ def hybrid_optimize_interval_scale(
         metrics = hybrid_metrics_from_outputs(calibrated)
         coverage = float(metrics["cov90"])
         width = float(metrics["width90"])
-        shortfall = max(0.0, float(target_cov) - coverage) if math.isfinite(coverage) else float("inf")
+        shortfall = (
+            max(0.0, float(target_cov) - coverage)
+            if math.isfinite(coverage)
+            else float("inf")
+        )
         rank = (0.0 if shortfall <= 0.0 else 1.0, shortfall, width)
         candidate: dict[str, Any] = {
             "scale": float(scale),
@@ -510,7 +551,11 @@ def hybrid_optimize_soft_gate_strategy(
     scales = hybrid_soft_gate_feature_scales(gbdt_outputs, afno_outputs)
     tau_candidates_raw = [0.0] + [
         abs(float(a) - float(g))
-        for g, a in zip(gbdt_outputs.get("y_pred") or [], afno_outputs.get("y_pred") or [])
+        for g, a in zip(
+            gbdt_outputs.get("y_pred") or [],
+            afno_outputs.get("y_pred") or [],
+            strict=False,
+        )
     ]
     tau_grid = sorted(
         {
@@ -531,7 +576,11 @@ def hybrid_optimize_soft_gate_strategy(
     except ValueError:
         max_trials = 384
     max_trials = max(1, min(10_000, max_trials))
-    condition_advantage = hybrid_condition_advantage_map(gbdt_outputs, afno_outputs) if use_condition_clusters else {}
+    condition_advantage = (
+        hybrid_condition_advantage_map(gbdt_outputs, afno_outputs)
+        if use_condition_clusters
+        else {}
+    )
     best: dict[str, Any] | None = None
     evaluated_trials = 0
     grid = itertools.product(
@@ -560,7 +609,9 @@ def hybrid_optimize_soft_gate_strategy(
             condition_advantage=condition_advantage,
         )
         point_metrics = hybrid_metrics_from_outputs(soft_outputs)
-        avg_entropy = hybrid_soft_gate_weight_entropy([float(v) for v in soft_outputs.get("afno_weight") or []])
+        avg_entropy = hybrid_soft_gate_weight_entropy(
+            [float(v) for v in soft_outputs.get("afno_weight") or []]
+        )
         interval_scale = 1.0
         interval_coverage = float("nan")
         interval_width = float("nan")
@@ -694,7 +745,14 @@ def fit_hybrid_gate(
     }
     occlusion_scores: dict[str, list[float]] = {}
     feature_baseline = _as_dict(gbdt_snapshot.get("feature_baseline"))
-    afno_qhat = stable_models.quantile_nearest_rank([float(v) for v in afno_pooled_residuals], 0.9) if afno_pooled_residuals else 0.0
+    afno_qhat = (
+        stable_models.quantile_nearest_rank(
+            [float(v) for v in afno_pooled_residuals],
+            0.9,
+        )
+        if afno_pooled_residuals
+        else 0.0
+    )
     for row in sample_rows:
         context_records = [dict(item) for item in _as_list(row.get("context_records"))]
         future_row = _as_dict(row.get("future_row"))
@@ -717,13 +775,17 @@ def fit_hybrid_gate(
         gbdt_outputs["lower"].append(float(g_low))
         gbdt_outputs["upper"].append(float(g_high))
         gbdt_outputs["condition_key"].append(hybrid_condition_cluster_key(future_row))
-        gbdt_outputs["tail_pos"].append(float(len(gbdt_outputs["tail_pos"]) / max(len(sample_rows) - 1, 1)))
+        gbdt_outputs["tail_pos"].append(
+            float(len(gbdt_outputs["tail_pos"]) / max(len(sample_rows) - 1, 1))
+        )
         afno_outputs["y_true"].append(float(row.get("y") or 0.0))
         afno_outputs["y_pred"].append(float(afno_pred))
         afno_outputs["lower"].append(float(afno_pred - afno_qhat))
         afno_outputs["upper"].append(float(afno_pred + afno_qhat))
         afno_outputs["condition_key"].append(hybrid_condition_cluster_key(future_row))
-        afno_outputs["tail_pos"].append(float(len(afno_outputs["tail_pos"]) / max(len(sample_rows) - 1, 1)))
+        afno_outputs["tail_pos"].append(
+            float(len(afno_outputs["tail_pos"]) / max(len(sample_rows) - 1, 1))
+        )
         details = forecast_univariate_torch_with_details(
             algo="afnocg3_v1",
             snapshot=afno_snapshot,
@@ -736,19 +798,38 @@ def fit_hybrid_gate(
             occlusion_baseline={str(k): float(v) for k, v in feature_baseline.items()},
             occlusion_top_k=5,
         )
-        feature_importance = _as_dict(_as_dict(_as_dict(details.get("occlusion")).get("global")).get("feature_importance"))
+        feature_importance = _as_dict(
+            _as_dict(_as_dict(details.get("occlusion")).get("global")).get(
+                "feature_importance"
+            )
+        )
         for key, value in feature_importance.items():
             occlusion_scores.setdefault(str(key), []).append(float(value))
     split_idx = max(4, int(round(len(sample_rows) * 0.6)))
-    split_idx = min(split_idx, max(1, len(sample_rows) - 2)) if len(sample_rows) > 2 else len(sample_rows)
+    split_idx = (
+        min(split_idx, max(1, len(sample_rows) - 2))
+        if len(sample_rows) > 2
+        else len(sample_rows)
+    )
 
     def _subset(outputs: dict[str, list[float]], start: int, end: int) -> dict[str, list[float]]:
-        return {key: [values[idx] for idx in range(start, min(end, len(values)))] for key, values in outputs.items()}
+        return {
+            key: [values[idx] for idx in range(start, min(end, len(values)))]
+            for key, values in outputs.items()
+        }
 
     calib_gbdt = _subset(gbdt_outputs, 0, split_idx)
     calib_afno = _subset(afno_outputs, 0, split_idx)
-    interval_gbdt = _subset(gbdt_outputs, split_idx, len(sample_rows)) if split_idx < len(sample_rows) else calib_gbdt
-    interval_afno = _subset(afno_outputs, split_idx, len(sample_rows)) if split_idx < len(sample_rows) else calib_afno
+    interval_gbdt = (
+        _subset(gbdt_outputs, split_idx, len(sample_rows))
+        if split_idx < len(sample_rows)
+        else calib_gbdt
+    )
+    interval_afno = (
+        _subset(afno_outputs, split_idx, len(sample_rows))
+        if split_idx < len(sample_rows)
+        else calib_afno
+    )
     gate_meta = hybrid_optimize_soft_gate_strategy(
         calib_gbdt,
         calib_afno,
@@ -757,7 +838,11 @@ def fit_hybrid_gate(
         interval_gbdt_outputs=interval_gbdt,
         interval_afno_outputs=interval_afno,
     )
-    ranked_occlusion = {key: float(np.mean(values)) for key, values in occlusion_scores.items() if values}
+    ranked_occlusion = {
+        key: float(np.mean(values))
+        for key, values in occlusion_scores.items()
+        if values
+    }
     gate_meta["afno_occlusion_global"] = top_feature_summary(
         ranked_occlusion,
         method="occlusion_delta_v1",
@@ -799,7 +884,10 @@ def train_hybrid_entry(
     write_json: Callable[[Path, dict[str, Any]], None],
     artifact_relpath: Callable[[str, str], str],
 ) -> dict[str, Any]:
-    from forecasting_api.torch_forecasters import forecast_univariate_torch, train_univariate_torch_forecaster
+    from forecasting_api.torch_forecasters import (
+        forecast_univariate_torch,
+        train_univariate_torch_forecaster,
+    )
 
     ys_by_series, records_by_series = build_request_training_payload(req.data)
     context_len = hybrid_context_len(records_by_series)
@@ -861,14 +949,21 @@ def train_hybrid_entry(
             * (
                 (float(g_high) - float(g_low))
                 - (
-                    2.0 * stable_models.quantile_nearest_rank(torch_artifact.pooled_residuals, 0.9)
+                    2.0
+                    * stable_models.quantile_nearest_rank(
+                        torch_artifact.pooled_residuals,
+                        0.9,
+                    )
                     if torch_artifact.pooled_residuals
                     else 0.0
                 )
             )
             / max(float(gate_config.get("width_scale") or 1.0), 1e-6)
         )
-        weight = sigmoid((term_delta + term_width) / max(float(gate_config.get("temperature") or 0.35), 1e-6))
+        weight = sigmoid(
+            (term_delta + term_width)
+            / max(float(gate_config.get("temperature") or 0.35), 1e-6)
+        )
         hybrid_pred = (1.0 - weight) * float(g_pred) + weight * float(a_pred)
         hybrid_residuals.append(abs(float(row.get("y") or 0.0) - hybrid_pred))
     snap_path = model_artifact_dir(model_id) / "snapshot.json"
@@ -958,7 +1053,11 @@ def fit_ridge_lags_model(
         lag_k = ridge_lags_choose_k(len(ys))
         state = ridge_lags_fit_series(ys, lag_k=lag_k)
         pooled_residuals.extend(
-            [float(value) for value in (state.get("residuals") or []) if isinstance(value, (int, float))]
+            [
+                float(value)
+                for value in (state.get("residuals") or [])
+                if isinstance(value, int | float)
+            ]
         )
         k = int(state.get("lag_k") or 1)
         last_vals = ys[-k:] if ys else []
@@ -974,7 +1073,7 @@ def fit_ridge_lags_model(
         "pooled_residuals": [
             float(value)
             for value in pooled_residuals
-            if isinstance(value, (int, float)) and math.isfinite(float(value))
+            if isinstance(value, int | float) and math.isfinite(float(value))
         ],
         "series": series_state,
     }

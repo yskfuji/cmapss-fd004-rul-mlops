@@ -1,6 +1,7 @@
 import json
 
 import pytest
+
 from enterprise.audit import (
     AuditEvent,
     AuditQuery,
@@ -31,8 +32,8 @@ from enterprise.iam import (
     validate_custom_role_permissions,
 )
 from enterprise.network import NetworkAccessPolicy, is_network_access_allowed
-from enterprise.tenant_settings import IpAllowlist, PrivateConnectivity
 from enterprise.tenancy import create_tenant, validate_tenant_id
+from enterprise.tenant_settings import IpAllowlist, PrivateConnectivity
 
 
 def test_audit_query_defaults():
@@ -206,7 +207,10 @@ def test_validate_custom_role_name_rejects_invalid_values(name: str, expected: s
         ((("x" * 129),), "permission too long"),
     ],
 )
-def test_validate_custom_role_permissions_rejects_invalid_values(permissions, expected: str) -> None:
+def test_validate_custom_role_permissions_rejects_invalid_values(
+    permissions,
+    expected: str,
+) -> None:
     with pytest.raises(ValueError, match=expected):
         validate_custom_role_permissions(permissions)
 

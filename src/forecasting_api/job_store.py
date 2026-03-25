@@ -135,7 +135,9 @@ class SqliteJobStore:
         with _connect(self._db_path) as conn:
             conn.execute(
                 """
-                INSERT INTO jobs (job_id, type, status, payload_json, progress, result_json, error_json)
+                INSERT INTO jobs (
+                    job_id, type, status, payload_json, progress, result_json, error_json
+                )
                 VALUES (?, ?, ?, ?, ?, NULL, NULL)
                 """,
                 (
@@ -301,10 +303,18 @@ class PostgresJobStore:
             with conn.cursor() as cur:
                 cur.execute(
                     """
-                    INSERT INTO jobs (job_id, type, status, payload_json, progress, result_json, error_json)
+                    INSERT INTO jobs (
+                        job_id, type, status, payload_json, progress, result_json, error_json
+                    )
                     VALUES (%s, %s, %s, %s, %s, NULL, NULL)
                     """,
-                    (job.job_id, job.type, job.status, _postgres_json_payload(job.payload), job.progress),
+                    (
+                        job.job_id,
+                        job.type,
+                        job.status,
+                        _postgres_json_payload(job.payload),
+                        job.progress,
+                    ),
                 )
             conn.commit()
         return job

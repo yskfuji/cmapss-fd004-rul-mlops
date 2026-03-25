@@ -1,9 +1,9 @@
 import pytest
 from fastapi.testclient import TestClient
+
 from forecasting_api import app as app_module
 from forecasting_api import training_helpers
 from forecasting_api.app import create_app
-
 from tests.helpers import raising_callable
 
 

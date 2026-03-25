@@ -2,11 +2,11 @@ from datetime import UTC, datetime, timedelta
 
 import pytest
 from fastapi.testclient import TestClient
+
 from forecasting_api import app as app_module
-from forecasting_api import hybrid_runtime
-from forecasting_api import training_helpers
-from forecasting_api.domain import stable_models
+from forecasting_api import hybrid_runtime, training_helpers
 from forecasting_api.app import create_app
+from forecasting_api.domain import stable_models
 
 
 def _forecast_payload() -> dict[str, object]:
@@ -66,7 +66,11 @@ def test_forecast_endpoint_requires_tenant_header_when_enabled(monkeypatch):
     monkeypatch.setenv("RULFM_FORECASTING_API_REQUIRE_TENANT", "1")
     client = TestClient(create_app())
 
-    response = client.post("/v1/forecast", headers={"x-api-key": "test-key"}, json=_forecast_payload())
+    response = client.post(
+        "/v1/forecast",
+        headers={"x-api-key": "test-key"},
+        json=_forecast_payload(),
+    )
 
     assert response.status_code == 400
     assert response.json()["error_code"] == "A14"
@@ -221,7 +225,10 @@ def _train_naive_get_model_id(client, headers: dict) -> str:
     return response.json()["model_id"]
 
 
-def test_forecast_with_trained_model_id_returns_different_predictions(monkeypatch, patched_app_runtime):
+def test_forecast_with_trained_model_id_returns_different_predictions(
+    monkeypatch,
+    patched_app_runtime,
+):
     """Non-naive path: train a model, forecast using its model_id, verify model_id roundtrip."""
     monkeypatch.setenv("RULFM_FORECASTING_API_KEY", "test-key")
 

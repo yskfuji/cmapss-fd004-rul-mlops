@@ -102,7 +102,12 @@ def render_swagger_ui(app: FastAPI, lang: str) -> HTMLResponse:
       justify-content: space-between;
       padding: 12px 18px;
       border-bottom: 1px solid #dde2e7;
-      background: linear-gradient(90deg, rgba(0, 102, 255, 0.08), rgba(110, 231, 255, 0.08), #ffffff);
+            background: linear-gradient(
+                90deg,
+                rgba(0, 102, 255, 0.08),
+                rgba(110, 231, 255, 0.08),
+                #ffffff
+            );
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
       font-size: 13px;
     }
@@ -128,7 +133,10 @@ def render_swagger_ui(app: FastAPI, lang: str) -> HTMLResponse:
     }
   </style>
   <div class="lang-banner">
-    <div class="muted">Language: <a href="/docs/en">English</a> / <a href="/docs/ja">日本語</a></div>
+        <div class="muted">
+            Language: <a href="/docs/en">English</a> /
+            <a href="/docs/ja">日本語</a>
+        </div>
     <div class="lang-badge">Docs language</div>
     <div><a href="/docs">Language selector</a></div>
   </div>

@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-from contextlib import AbstractContextManager
 from collections.abc import Callable, MutableMapping
+from contextlib import AbstractContextManager
 from dataclasses import dataclass
 from datetime import timedelta
 from pathlib import Path

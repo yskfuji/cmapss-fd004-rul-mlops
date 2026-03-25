@@ -26,7 +26,7 @@ def _csv_tokens(raw: str | None) -> tuple[str, ...]:
 def _claim_values(value: Any) -> tuple[str, ...]:
     if isinstance(value, str):
         return (value.strip(),) if value.strip() else ()
-    if isinstance(value, (list, tuple, set)):
+    if isinstance(value, list | tuple | set):
         out: list[str] = []
         for item in value:
             token = str(item or "").strip()
@@ -127,7 +127,10 @@ def enforce_train_request_approval(
                 message="train には承認済み group claim が必要です",
                 details={
                     "error": "authenticated principal does not belong to an approved train group",
-                    "next_action": "承認済み group claim を持つ OIDC principal で再実行してください",
+                    "next_action": (
+                        "承認済み group claim を持つ OIDC principal で"
+                        "再実行してください"
+                    ),
                 },
             )
 

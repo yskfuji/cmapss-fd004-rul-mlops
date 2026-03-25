@@ -7,6 +7,7 @@ import pytest
 pytest.importorskip("torch")
 
 import torch
+
 import models.registry as registry_module
 from models.registry import get_model_handlers
 

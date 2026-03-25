@@ -3,6 +3,7 @@ from __future__ import annotations
 import base64
 
 import pytest
+
 from forecasting_api import secrets_provider
 
 

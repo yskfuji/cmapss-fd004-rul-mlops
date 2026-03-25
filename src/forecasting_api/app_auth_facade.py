@@ -1,14 +1,15 @@
-from __future__ import annotations
-
 """Reader-only auth/env facade for app.py.
 
 This module centralizes env-driven auth and request-setting readers, while
 app.py keeps the thin monkeypatch-compatible request entry wrappers.
 """
 
+from __future__ import annotations
+
+from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Callable
+from typing import Any
 
 from . import app_bootstrap
 from . import auth as auth_helpers

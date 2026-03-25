@@ -423,7 +423,11 @@ def train_univariate_torch_forecaster(
                 # use the log-space cap so it varies across the full [0, log1p(max_rul)]
                 # range instead of collapsing to a near-constant ≈ 0.926.
                 raw_max_rul = float(protocol["asym_max_rul"])
-                effective_max_rul = math.log1p(raw_max_rul) if transform_name == "log1p" else raw_max_rul
+                effective_max_rul = (
+                    math.log1p(raw_max_rul)
+                    if transform_name == "log1p"
+                    else raw_max_rul
+                )
                 loss_fn = _AsymmetricRULLoss(
                     over_penalty=float(protocol["asym_over_penalty"]),
                     under_penalty=float(protocol["asym_under_penalty"]),

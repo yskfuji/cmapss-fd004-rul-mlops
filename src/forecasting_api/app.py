@@ -4,7 +4,8 @@ import hashlib
 import math
 import os
 from datetime import UTC, datetime, timedelta
-from importlib.metadata import PackageNotFoundError, version as package_version
+from importlib.metadata import PackageNotFoundError
+from importlib.metadata import version as package_version
 from pathlib import Path
 from time import monotonic
 from typing import Any, Literal, cast
@@ -13,16 +14,19 @@ from fastapi import Depends, FastAPI, Header, Request, Response
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-from . import app_auth_facade
-from . import app_compat
-from . import app_bootstrap
-from . import app_docs
+
+from . import (
+    app_auth_facade,
+    app_bootstrap,
+    app_compat,
+    app_docs,
+    backtest_runtime,
+    forecast_runtime,
+    torch_runtime,
+    train_runtime,
+    training_helpers,
+)
 from . import auth as auth_helpers
-from . import backtest_runtime
-from . import forecast_runtime
-from . import torch_runtime
-from . import train_runtime
-from . import training_helpers
 from .cmapss_fd004 import available_profiles, build_fd004_payload, build_fd004_profile_payload
 from .config import env_bool, env_int
 from .deployment_guard import validate_cloud_run_runtime
@@ -50,7 +54,6 @@ from .schemas import (
     ModelCatalogResponse,
 )
 from .secrets_provider import resolve_secret
-
 
 BacktestRequest = app_compat.BacktestRequest
 BacktestResponse = app_compat.BacktestResponse

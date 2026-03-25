@@ -1,17 +1,24 @@
 from __future__ import annotations
 
 import math
+from collections.abc import Callable
 from datetime import timedelta
 from pathlib import Path
 from statistics import NormalDist
-from typing import Any, Callable
+from typing import Any
 
 import numpy as np
 
 from . import training_helpers
 from .domain import stable_models
 from .errors import ApiError
-from .schemas import BacktestRequest, BacktestResponse, ForecastPoint, ForecastRequest, ForecastResponse
+from .schemas import (
+    BacktestRequest,
+    BacktestResponse,
+    ForecastPoint,
+    ForecastRequest,
+    ForecastResponse,
+)
 
 
 def _as_dict(value: Any) -> dict[str, Any]:
@@ -26,7 +33,7 @@ def _as_float_list(value: Any) -> list[float]:
     return [
         float(item)
         for item in _as_list(value)
-        if isinstance(item, (int, float)) and math.isfinite(float(item))
+        if isinstance(item, int | float) and math.isfinite(float(item))
     ]
 
 
@@ -40,8 +47,12 @@ def hybrid_backtest(
     extract_state_dict: Callable[[dict[str, Any]], dict[str, Any]],
     load_joblib_artifact: Callable[[Path], Any],
     predict_hgb_next_fn: Callable[..., tuple[float, float, float]] = stable_models.predict_hgb_next,
-    gate_step_payload_fn: Callable[..., dict[str, float]] = training_helpers.hybrid_gate_step_payload,
-    hybrid_condition_cluster_key_fn: Callable[[dict[str, Any]], str] = training_helpers.hybrid_condition_cluster_key,
+    gate_step_payload_fn: Callable[
+        ..., dict[str, float]
+    ] = training_helpers.hybrid_gate_step_payload,
+    hybrid_condition_cluster_key_fn: Callable[
+        [dict[str, Any]], str
+    ] = training_helpers.hybrid_condition_cluster_key,
     metric_value_fn: Callable[..., float] = stable_models.metric_value,
 ) -> BacktestResponse:
     from .torch_forecasters import forecast_univariate_torch_with_details
@@ -127,7 +138,9 @@ def hybrid_backtest(
                         "x": dict(train_rows[-1].x or {}),
                     }
                 )
-                context_records = [dict(pad) for _ in range(need - len(context_records))] + context_records
+                context_records = [
+                    dict(pad) for _ in range(need - len(context_records))
+                ] + context_records
 
             future_feature_rows = [
                 {"timestamp": row.timestamp.isoformat(), "y": float(row.y), "x": dict(row.x or {})}
@@ -146,7 +159,10 @@ def hybrid_backtest(
             afno_points = [float(value) for value in torch_details.get("point") or []]
             afno_vars = [
                 float(value)
-                for value in (((torch_details.get("mc_dropout") or {}).get("per_step_var")) or [0.0] * req.horizon)
+                for value in (
+                    ((torch_details.get("mc_dropout") or {}).get("per_step_var"))
+                    or [0.0] * req.horizon
+                )
             ]
 
             gbdt_rows = [dict(row) for row in context_records]
@@ -158,7 +174,9 @@ def hybrid_backtest(
                     context_records=gbdt_rows[-context_len:],
                     feature_keys=feature_keys,
                 )
-                a_pred = float(afno_points[step_idx]) if step_idx < len(afno_points) else float(g_pred)
+                a_pred = (
+                    float(afno_points[step_idx]) if step_idx < len(afno_points) else float(g_pred)
+                )
                 afno_std = math.sqrt(
                     max(0.0, float(afno_vars[step_idx]) if step_idx < len(afno_vars) else 0.0)
                 )
@@ -171,19 +189,28 @@ def hybrid_backtest(
                     a_upper=float(a_pred + afno_std),
                     gate_meta=_as_dict(gate_meta),
                     condition_key=hybrid_condition_cluster_key_fn({"x": future_x}),
-                    tail_pos=(float(step_idx / max(req.horizon - 1, 1)) if req.horizon > 1 else 0.5),
+                    tail_pos=(
+                        float(step_idx / max(req.horizon - 1, 1)) if req.horizon > 1 else 0.5
+                    ),
                 )
-                blended_pred = float(gate_payload["gbdt_weight"]) * float(g_pred) + float(gate_payload["afno_weight"]) * a_pred
+                blended_pred = (
+                    float(gate_payload["gbdt_weight"]) * float(g_pred)
+                    + float(gate_payload["afno_weight"]) * a_pred
+                )
                 blended_preds.append(blended_pred)
                 gbdt_rows.append(
-                    {"timestamp": actual_row.timestamp.isoformat(), "y": blended_pred, "x": future_x}
+                    {
+                        "timestamp": actual_row.timestamp.isoformat(),
+                        "y": blended_pred,
+                        "x": future_x,
+                    }
                 )
 
             y_true.extend(actual)
             y_pred.extend(blended_preds)
             train_y.extend(train)
 
-            for idx, (truth, pred) in enumerate(zip(actual, blended_preds), start=1):
+            for idx, (truth, pred) in enumerate(zip(actual, blended_preds, strict=False), start=1):
                 by_h_true[idx].append(float(truth))
                 by_h_pred[idx].append(float(pred))
                 by_h_train[idx].extend(train)
@@ -194,13 +221,19 @@ def hybrid_backtest(
         if not y_true:
             continue
 
-        per_series_metric = metric_value_fn(req.metric, y_true=y_true, y_pred=y_pred, train_y=train_y)
-        per_series_entries.append({"series_id": series_id, "metric": req.metric, "value": float(per_series_metric)})
+        per_series_metric = metric_value_fn(
+            req.metric, y_true=y_true, y_pred=y_pred, train_y=train_y
+        )
+        per_series_entries.append(
+            {"series_id": series_id, "metric": req.metric, "value": float(per_series_metric)}
+        )
         overall_true.extend(y_true)
         overall_pred.extend(y_pred)
         overall_train_y.extend(train_y)
 
-    overall = metric_value_fn(req.metric, y_true=overall_true, y_pred=overall_pred, train_y=overall_train_y)
+    overall = metric_value_fn(
+        req.metric, y_true=overall_true, y_pred=overall_pred, train_y=overall_train_y
+    )
 
     by_h_entries: list[dict[str, Any]] = []
     for horizon in range(1, req.horizon + 1):
@@ -243,8 +276,12 @@ def forecast_with_hybrid_model(
     extract_state_dict: Callable[[dict[str, Any]], dict[str, Any]],
     load_joblib_artifact: Callable[[Path], Any],
     predict_hgb_next_fn: Callable[..., tuple[float, float, float]] = stable_models.predict_hgb_next,
-    gate_step_payload_fn: Callable[..., dict[str, float]] = training_helpers.hybrid_gate_step_payload,
-    hybrid_condition_cluster_key_fn: Callable[[dict[str, Any]], str] = training_helpers.hybrid_condition_cluster_key,
+    gate_step_payload_fn: Callable[
+        ..., dict[str, float]
+    ] = training_helpers.hybrid_gate_step_payload,
+    hybrid_condition_cluster_key_fn: Callable[
+        [dict[str, Any]], str
+    ] = training_helpers.hybrid_condition_cluster_key,
 ) -> ForecastResponse:
     from .torch_forecasters import forecast_univariate_torch_with_details
 
@@ -276,7 +313,7 @@ def forecast_with_hybrid_model(
     baseline_map = {
         str(key): float(value)
         for key, value in _as_dict(gbdt_meta.get("feature_baseline")).items()
-        if isinstance(value, (int, float))
+        if isinstance(value, int | float)
     }
     mc_samples = (
         int(getattr(req.options, "mc_dropout_samples", 16))
@@ -300,12 +337,22 @@ def forecast_with_hybrid_model(
         rows_sorted = sorted(rows, key=lambda row: row.timestamp)
         last_ts = rows_sorted[-1].timestamp
         context_records = [
-            {"timestamp": record.timestamp.isoformat(), "y": float(record.y), "x": dict(record.x or {})}
+            {
+                "timestamp": record.timestamp.isoformat(),
+                "y": float(record.y),
+                "x": dict(record.x or {}),
+            }
             for record in rows_sorted[-context_len:]
         ]
         if len(context_records) < max(1, context_len):
-            pad = dict(context_records[0]) if context_records else {"timestamp": last_ts.isoformat(), "y": 0.0, "x": {}}
-            context_records = [dict(pad) for _ in range(max(1, context_len) - len(context_records))] + context_records
+            pad = (
+                dict(context_records[0])
+                if context_records
+                else {"timestamp": last_ts.isoformat(), "y": 0.0, "x": {}}
+            )
+            context_records = [
+                dict(pad) for _ in range(max(1, context_len) - len(context_records))
+            ] + context_records
         torch_details = forecast_univariate_torch_with_details(
             algo="afnocg3_v1",
             snapshot=snapshot,
@@ -321,7 +368,9 @@ def forecast_with_hybrid_model(
         afno_points = [float(value) for value in torch_details.get("point") or []]
         afno_vars = [
             float(value)
-            for value in (((torch_details.get("mc_dropout") or {}).get("per_step_var")) or [0.0] * req.horizon)
+            for value in (
+                ((torch_details.get("mc_dropout") or {}).get("per_step_var")) or [0.0] * req.horizon
+            )
         ]
         afno_occlusion_steps = (torch_details.get("occlusion") or {}).get("per_step") or []
 
@@ -369,7 +418,9 @@ def forecast_with_hybrid_model(
             expert_disagreement_var = afno_weight * gbdt_weight * ((a_pred - g_pred) ** 2)
             total_var = max(
                 0.0,
-                (gbdt_weight * gbdt_interval_var) + (afno_weight * afno_var) + expert_disagreement_var,
+                (gbdt_weight * gbdt_interval_var)
+                + (afno_weight * afno_var)
+                + expert_disagreement_var,
             )
             total_std = math.sqrt(total_var)
             interval_scale = max(float(gate_meta.get("interval_scale") or 1.0), 1e-6)
@@ -392,7 +443,13 @@ def forecast_with_hybrid_model(
                 for level in req.level:
                     z_value = normal.inv_cdf(0.5 + (float(level) / 200.0))
                     width = float(z_value * calibrated_total_std)
-                    intervals.append({"level": float(level), "lower": float(point - width), "upper": float(point + width)})
+                    intervals.append(
+                        {
+                            "level": float(level),
+                            "lower": float(point - width),
+                            "upper": float(point + width),
+                        }
+                    )
 
             uncertainty_payload = {
                 "method": "hybrid_3way_v1",
@@ -420,7 +477,9 @@ def forecast_with_hybrid_model(
                     },
                 },
                 "gbdt": _as_dict(hybrid_meta.get("model_explainability")).get("gbdt"),
-                "afno": afno_occlusion_steps[step_idx] if step_idx < len(afno_occlusion_steps) else _as_dict(hybrid_meta.get("model_explainability")).get("afno"),
+                "afno": afno_occlusion_steps[step_idx]
+                if step_idx < len(afno_occlusion_steps)
+                else _as_dict(hybrid_meta.get("model_explainability")).get("afno"),
             }
             forecasts.append(
                 ForecastPoint(
@@ -436,7 +495,10 @@ def forecast_with_hybrid_model(
 
     uncertainty_summary = {
         "method": "hybrid_3way_v1",
-        "components_mean": {key: (float(np.mean(values)) if values else 0.0) for key, values in component_rollups.items()},
+        "components_mean": {
+            key: (float(np.mean(values)) if values else 0.0)
+            for key, values in component_rollups.items()
+        },
         "interval_scale": float(gate_meta.get("interval_scale") or 1.0),
         "mc_dropout_samples": int(mc_samples),
     }
@@ -451,6 +513,8 @@ def forecast_with_hybrid_model(
         warnings=None,
         calibration=calibration,
         residuals_evidence=stable_models.build_residuals_evidence(residuals),
-        model_explainability=hybrid_meta.get("model_explainability") if isinstance(hybrid_meta.get("model_explainability"), dict) else None,
+        model_explainability=hybrid_meta.get("model_explainability")
+        if isinstance(hybrid_meta.get("model_explainability"), dict)
+        else None,
         uncertainty_summary=uncertainty_summary,
     )

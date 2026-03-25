@@ -1,8 +1,9 @@
 from __future__ import annotations
 
+from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Callable
+from typing import Any
 
 from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
@@ -32,7 +33,11 @@ class DocsRouteBindings:
     openapi_ja: Callable[..., Any]
 
 
-def build_api_response_docs(*, bi: Callable[[str, str], str], error_response_model: Any) -> ApiResponseDocs:
+def build_api_response_docs(
+    *,
+    bi: Callable[[str, str], str],
+    error_response_model: Any,
+) -> ApiResponseDocs:
     request_id_header: dict[str, Any] = {
         "X-Request-Id": {
             "description": bi(
@@ -175,7 +180,10 @@ def configure_openapi_and_docs(app: FastAPI) -> DocsRouteBindings:
     <div class="wrap">
       <div class="card">
         <h1>{app.title} API Docs</h1>
-        <p class="muted">Swagger UI has no built-in language toggle. Select a language to view localized descriptions.</p>
+                <p class="muted">
+                    Swagger UI has no built-in language toggle. Select a language to view
+                    localized descriptions.
+                </p>
         <p class="muted">推奨言語: {hint}</p>
         <div class="actions">
           <a class="button" href="/docs/en">English</a>

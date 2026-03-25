@@ -6,9 +6,9 @@ from pathlib import Path
 
 import pytest
 from fastapi.testclient import TestClient
+
 from forecasting_api import app as app_module
 from forecasting_api.app import create_app
-
 from tests.helpers import raising_callable
 
 _MISSING = object()
@@ -94,9 +94,15 @@ def test_openapi_language_routes_return_schema(public_client: TestClient) -> Non
     ja_schema = response_ja.json()
     assert en_schema["info"]["title"]
     assert ja_schema["info"]["title"]
-    default_desc = default_schema["components"]["schemas"]["ForecastRequest"]["properties"]["horizon"]["description"]
-    en_desc = en_schema["components"]["schemas"]["ForecastRequest"]["properties"]["horizon"]["description"]
-    ja_desc = ja_schema["components"]["schemas"]["ForecastRequest"]["properties"]["horizon"]["description"]
+    default_desc = default_schema["components"]["schemas"]["ForecastRequest"]["properties"][
+        "horizon"
+    ]["description"]
+    en_desc = en_schema["components"]["schemas"]["ForecastRequest"]["properties"]["horizon"][
+        "description"
+    ]
+    ja_desc = ja_schema["components"]["schemas"]["ForecastRequest"]["properties"]["horizon"][
+        "description"
+    ]
     assert "Forecast horizon (steps)." in default_desc
     assert "予測期間（ステップ数）。" in default_desc
     assert en_desc == "Forecast horizon (steps)."
@@ -116,7 +122,7 @@ def test_openapi_default_is_cached_per_app_instance() -> None:
 
 def test_cmapss_sample_endpoint_returns_payload_from_profile_builder(
     monkeypatch: pytest.MonkeyPatch,
-    client_factory,
+    client_factory: Callable[..., AbstractContextManager[TestClient]],
 ) -> None:
     monkeypatch.setattr(
         app_module,

@@ -6,7 +6,6 @@ from pathlib import Path
 from types import SimpleNamespace
 
 from forecasting_api import mlflow_runs
-
 from tests.helpers import raising_callable
 
 

@@ -3,6 +3,8 @@ from __future__ import annotations
 from typing import Any, Literal
 
 from fastapi.responses import JSONResponse
+from pydantic import ValidationError
+
 from forecasting_api.schemas import (
     BacktestRequest,
     ErrorDetails,
@@ -12,12 +14,8 @@ from forecasting_api.schemas import (
     JobStatusResponse,
     TrainRequest,
 )
-from pydantic import ValidationError
 
-from .backtest_service import run_backtest_request
-from .forecast_service import run_forecast
 from .runtime import JobsServiceDeps
-from .train_service import run_train
 
 _service_deps: JobsServiceDeps | None = None
 
@@ -58,7 +56,10 @@ def build_run_job(deps: JobsServiceDeps):
 
             if job_type == "backtest":
                 backtest_req = BacktestRequest.model_validate(payload)
-                result = deps.run_backtest_request(backtest_req).model_dump(mode="json", exclude_none=True)
+                result = deps.run_backtest_request(backtest_req).model_dump(
+                    mode="json",
+                    exclude_none=True,
+                )
                 job_store.set_succeeded(job_id, result)
                 return
 

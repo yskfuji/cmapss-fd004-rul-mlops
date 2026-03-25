@@ -4,11 +4,9 @@ import math
 
 import pytest
 
-pytest.importorskip("torch")
+torch = pytest.importorskip("torch")
+torch_forecasters = pytest.importorskip("forecasting_api.torch_forecasters")
 pytestmark = pytest.mark.experimental
-
-import torch
-from forecasting_api import torch_forecasters
 
 
 def _loss(  # noqa: E501

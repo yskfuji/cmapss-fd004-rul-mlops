@@ -51,7 +51,11 @@ def patched_app_runtime(
     monkeypatch.setattr(app_module, "_save_trained_model", lambda entry: None)
     monkeypatch.setattr(app_module, "start_run", lambda *args, **kwargs: nullcontext())
     monkeypatch.setattr(app_module, "log_params", lambda payload: logged["params"].append(payload))
-    monkeypatch.setattr(app_module, "log_metrics", lambda payload: logged["metrics"].append(payload))
+    monkeypatch.setattr(
+        app_module,
+        "log_metrics",
+        lambda payload: logged["metrics"].append(payload),
+    )
     monkeypatch.setattr(
         app_module,
         "log_dict_artifact",

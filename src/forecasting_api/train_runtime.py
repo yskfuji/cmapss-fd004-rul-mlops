@@ -1,8 +1,9 @@
 from __future__ import annotations
 
+from collections.abc import Callable
 from contextlib import AbstractContextManager
 from pathlib import Path
-from typing import Any, Callable
+from typing import Any
 
 from forecasting_api.domain import stable_models
 from forecasting_api.errors import ApiError

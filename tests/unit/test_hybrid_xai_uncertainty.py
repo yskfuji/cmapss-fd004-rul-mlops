@@ -1,4 +1,5 @@
 import pytest
+
 from forecasting_api.hybrid_xai_uncertainty import (
     apply_soft_gate_envelope_interval,
     condition_advantage_map,

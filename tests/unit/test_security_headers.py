@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from fastapi import Request, Response
+
 from forecasting_api.middleware.security_headers import apply_standard_security_headers
 
 

@@ -59,13 +59,18 @@ def test_small_helpers_cover_env_json_and_artifact_paths(monkeypatch, tmp_path) 
 
     monkeypatch.setenv("RULFM_HELPER_PATH", str(tmp_path / "helper.json"))
     assert app_module._env_first("RULFM_HELPER_PATH") == str(tmp_path / "helper.json")
-    assert app_module._env_path(tmp_path / "fallback.json", "RULFM_HELPER_PATH") == tmp_path / "helper.json"
+    assert app_module._env_path(
+        tmp_path / "fallback.json",
+        "RULFM_HELPER_PATH",
+    ) == tmp_path / "helper.json"
 
     monkeypatch.setattr(app_module, "_MODEL_ARTIFACTS_ROOT", tmp_path)
     artifact_dir = app_module._model_artifact_dir("model-a")
     assert artifact_dir == tmp_path / "model-a"
     assert app_module._artifact_relpath("model-a", "snapshot.json") == "model-a/snapshot.json"
-    assert app_module._artifact_abspath("model-a/snapshot.json") == (tmp_path / "model-a" / "snapshot.json").resolve()
+    assert app_module._artifact_abspath("model-a/snapshot.json") == (
+        tmp_path / "model-a" / "snapshot.json"
+    ).resolve()
 
     payload_path = tmp_path / "payload.json"
     app_module._write_json(payload_path, {"ok": True})
@@ -84,7 +89,11 @@ def test_storage_and_torch_helpers_cover_fallback_paths(monkeypatch, tmp_path) -
     assert payload["notes"][0] == "FD004 benchmark summary has not been generated yet."
 
     calls: list[str] = []
-    monkeypatch.setattr(app_module, "save_models_to_store", lambda *args, **kwargs: (_ for _ in ()).throw(RuntimeError("boom")))
+    monkeypatch.setattr(
+        app_module,
+        "save_models_to_store",
+        lambda *args, **kwargs: (_ for _ in ()).throw(RuntimeError("boom")),
+    )
     monkeypatch.setattr(
         app_module,
         "_LOGGER",
@@ -175,7 +184,9 @@ def test_frequency_and_gap_helpers_cover_infer_and_validation_paths(monkeypatch)
     ) == timedelta(days=1)
 
     with pytest.raises(app_module.ApiError) as exc_info:
-        app_module._require_frequency_or_infer(app_module.ForecastRequest(horizon=1, data=irregular))
+        app_module._require_frequency_or_infer(
+            app_module.ForecastRequest(horizon=1, data=irregular)
+        )
     assert exc_info.value.message == "frequency を推定できません"
 
     with pytest.raises(app_module.ApiError) as exc_info:
@@ -203,7 +214,10 @@ def test_frequency_and_gap_helpers_cover_infer_and_validation_paths(monkeypatch)
     assert exc_info.value.error_code == "M01"
 
 
-def test_request_auth_rate_limit_and_audit_helpers_cover_runtime_paths(monkeypatch, tmp_path) -> None:
+def test_request_auth_rate_limit_and_audit_helpers_cover_runtime_paths(
+    monkeypatch,
+    tmp_path,
+) -> None:
     request = _fake_request(request_id="req-123")
     response = app_module._error_json(
         request,
@@ -219,7 +233,9 @@ def test_request_auth_rate_limit_and_audit_helpers_cover_runtime_paths(monkeypat
     assert body["request_id"] == "req-123"
     assert body["details"]["next_action"] == "configure auth"
 
-    assert app_module._is_https_request(_fake_request(headers={"x-forwarded-proto": "https"})) is True
+    assert app_module._is_https_request(
+        _fake_request(headers={"x-forwarded-proto": "https"})
+    ) is True
     assert app_module._is_https_request(_fake_request(scheme="https")) is True
     assert app_module._is_https_request(_fake_request()) is False
 
@@ -303,7 +319,11 @@ def test_require_api_key_covers_misconfigured_success_and_oidc_fallback(monkeypa
 
     warnings: list[str] = []
     request = _fake_request()
-    monkeypatch.setattr(app_module, "_validate_oidc_bearer_token", lambda token: (_ for _ in ()).throw(RuntimeError("bad token")))
+    monkeypatch.setattr(
+        app_module,
+        "_validate_oidc_bearer_token",
+        lambda token: (_ for _ in ()).throw(RuntimeError("bad token")),
+    )
     monkeypatch.setattr(
         app_module,
         "_LOGGER",
@@ -323,12 +343,18 @@ def test_require_api_access_enforces_policy_after_auth(monkeypatch) -> None:
     monkeypatch.setattr(
         app_module,
         "_require_api_key",
-        lambda req, x_api_key=None, authorization=None: setattr(req.state, "auth_method", "x-api-key"),
+        lambda req, x_api_key=None, authorization=None: setattr(
+            req.state,
+            "auth_method",
+            "x-api-key",
+        ),
     )
     monkeypatch.setattr(
         app_module,
         "enforce_request_policy",
-        lambda req, tenant_id, connection_type: calls.append((req.state.auth_method, tenant_id, connection_type)),
+        lambda req, tenant_id, connection_type: calls.append(
+            (req.state.auth_method, tenant_id, connection_type)
+        ),
     )
 
     app_module._require_api_access(
@@ -852,7 +878,9 @@ def test_ridge_lags_backtest_uses_trained_hint_and_skips_short_series(monkeypatc
     assert len(response.by_fold or []) == 3
 
 
-def test_ridge_lags_backtest_handles_invalid_hint_and_stops_when_train_too_short(monkeypatch) -> None:
+def test_ridge_lags_backtest_handles_invalid_hint_and_stops_when_train_too_short(
+    monkeypatch,
+) -> None:
     original_fit = stable_models.ridge_lags_fit_series
     lag_ks: list[int] = []
 
@@ -1216,12 +1244,22 @@ def test_hybrid_backtest_covers_gate_and_padding_paths(monkeypatch) -> None:
         return base, base - 2.0, base + 2.0
 
     def _fake_details(**kwargs):
-        detail_calls.append({"context_len": len(kwargs["context_records"]), "horizon": kwargs["horizon"]})
+        detail_calls.append(
+            {
+                "context_len": len(kwargs["context_records"]),
+                "horizon": kwargs["horizon"],
+            }
+        )
         horizon = int(kwargs["horizon"])
         return {
             "point": [40.0 + float(idx) for idx in range(horizon)],
             "mc_dropout": {"per_step_var": [0.25 + (0.05 * idx) for idx in range(horizon)]},
-            "occlusion": {"per_step": [{"top_features": [{"feature": "sensor_1", "score": 0.9}]} for _ in range(horizon)]},
+            "occlusion": {
+                "per_step": [
+                    {"top_features": [{"feature": "sensor_1", "score": 0.9}]}
+                    for _ in range(horizon)
+                ]
+            },
         }
 
     monkeypatch.setattr(app_module, "_read_json", _fake_read_json)

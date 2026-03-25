@@ -22,7 +22,7 @@ def as_float_list(value: Any) -> list[float]:
     return [
         float(item)
         for item in as_list(value)
-        if isinstance(item, (int, float)) and math.isfinite(float(item))
+        if isinstance(item, int | float) and math.isfinite(float(item))
     ]
 
 

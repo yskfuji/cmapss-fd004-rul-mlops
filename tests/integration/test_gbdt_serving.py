@@ -10,6 +10,7 @@ correctly without requiring the FD004 dataset.
 
 import pytest
 from fastapi.testclient import TestClient
+
 from forecasting_api.app import create_app
 
 # ---------------------------------------------------------------------------

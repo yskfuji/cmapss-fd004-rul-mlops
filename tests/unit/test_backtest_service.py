@@ -1,8 +1,7 @@
 # ruff: noqa: E501
 from forecasting_api import app as app_module
+from forecasting_api import hybrid_runtime, training_helpers
 from forecasting_api.domain import stable_models
-from forecasting_api import hybrid_runtime
-from forecasting_api import training_helpers
 from forecasting_api.services.backtest_service import (
     configure_backtest_service,
     run_backtest_request,

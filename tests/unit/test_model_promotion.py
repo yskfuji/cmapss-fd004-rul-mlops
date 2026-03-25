@@ -3,6 +3,7 @@ from concurrent.futures import ThreadPoolExecutor
 from contextlib import nullcontext
 
 import pytest
+
 from forecasting_api import model_promotion as model_promotion_module
 from forecasting_api.model_promotion import (
     evaluate_promotion_candidate,

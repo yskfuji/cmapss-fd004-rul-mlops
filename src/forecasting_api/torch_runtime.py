@@ -4,9 +4,10 @@ import importlib
 import math
 import os
 import sys
+from collections.abc import Callable
 from pathlib import Path
 from types import SimpleNamespace
-from typing import Any, Callable, cast
+from typing import Any, cast
 
 from forecasting_api.errors import ApiError
 from forecasting_api.schemas import (
@@ -67,8 +68,10 @@ def _load_torch_artifacts(
 ) -> tuple[str, dict[str, Any], dict[str, Any], int]:
     algo = str(trained.get("algo") or "").strip().lower()
     artifact = _as_dict(trained.get("artifact"))
-    snapshot_rel = artifact.get("snapshot_json") if isinstance(artifact.get("snapshot_json"), str) else None
-    weights_rel = artifact.get("weights_pt") if isinstance(artifact.get("weights_pt"), str) else None
+    snapshot_value = artifact.get("snapshot_json")
+    weights_value = artifact.get("weights_pt")
+    snapshot_rel = snapshot_value if isinstance(snapshot_value, str) else None
+    weights_rel = weights_value if isinstance(weights_value, str) else None
     if not snapshot_rel or not weights_rel:
         raise api_error_cls(
             status_code=400,
@@ -132,13 +135,22 @@ def _build_torch_calibration(
     if not has_calib:
         warnings.append(
             bi(
-                f"CALIB01: insufficient residuals for split conformal (n={len(residuals)} < {calib_min}).",
-                f"CALIB01: split conformal の残差が不足しています（n={len(residuals)} < {calib_min}）。",
+                (
+                    "CALIB01: insufficient residuals for split conformal "
+                    f"(n={len(residuals)} < {calib_min})."
+                ),
+                (
+                    "CALIB01: split conformal の残差が不足しています"
+                    f"（n={len(residuals)} < {calib_min}）。"
+                ),
             )
         )
 
     calibration: dict[str, Any] | None = None
-    if has_calib and (qhat_for_quantiles is not None or (qhat_by_level is not None and len(qhat_by_level) > 0)):
+    if has_calib and (
+        qhat_for_quantiles is not None
+        or (qhat_by_level is not None and len(qhat_by_level) > 0)
+    ):
         calibration = {
             "method": "split_conformal_abs_error",
             "residuals_n": len(residuals),
@@ -194,7 +206,7 @@ def _load_multivariate_sequence_model(
         sys.path.insert(0, repo_root)
 
     module = importlib.import_module("src.models.stardast2_v5_adapter")
-    loader = cast(Callable[..., Any], getattr(module, "load_from_snapshot"))
+    loader = cast(Callable[..., Any], module.load_from_snapshot)
     model = loader(cfg, device, snapshot, model_params=None)
     model.load_state_dict(state_dict, strict=False)
     return model, device, device_str
@@ -515,13 +527,29 @@ def torch_backtest(
         if not y_true:
             continue
 
-        metric_value = metric_value_fn(req.metric, y_true=y_true, y_pred=y_pred, train_y=train_y)
-        per_series_entries.append({"series_id": series_id, "metric": req.metric, "value": float(metric_value)})
+        metric_value = metric_value_fn(
+            req.metric,
+            y_true=y_true,
+            y_pred=y_pred,
+            train_y=train_y,
+        )
+        per_series_entries.append(
+            {
+                "series_id": series_id,
+                "metric": req.metric,
+                "value": float(metric_value),
+            }
+        )
         overall_true.extend(y_true)
         overall_pred.extend(y_pred)
         overall_train.extend(train_y)
 
-    overall = metric_value_fn(req.metric, y_true=overall_true, y_pred=overall_pred, train_y=overall_train)
+    overall = metric_value_fn(
+        req.metric,
+        y_true=overall_true,
+        y_pred=overall_pred,
+        train_y=overall_train,
+    )
 
     by_h_entries = [
         {

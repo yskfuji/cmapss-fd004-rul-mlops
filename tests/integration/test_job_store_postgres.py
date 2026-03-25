@@ -54,7 +54,10 @@ def test_postgres_job_store_recovers_stale_running_job() -> None:
     with psycopg.connect(dsn) as conn:
         with conn.cursor() as cur:
             cur.execute(
-                "UPDATE jobs SET updated_at = CURRENT_TIMESTAMP - INTERVAL '2 hours' WHERE job_id = %s",
+                (
+                    "UPDATE jobs SET updated_at = CURRENT_TIMESTAMP - "
+                    "INTERVAL '2 hours' WHERE job_id = %s"
+                ),
                 (created.job_id,),
             )
         conn.commit()

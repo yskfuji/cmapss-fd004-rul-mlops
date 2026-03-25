@@ -7,7 +7,6 @@ from typing import Any, cast
 
 from forecasting_api.logging_config import get_logger
 
-
 _LOGGER = get_logger("model_registry_store")
 
 
@@ -231,7 +230,8 @@ def _connect_postgres(dsn: str) -> Any:
         import psycopg
     except ImportError as exc:
         raise RuntimeError(
-            "PostgreSQL model registry requires psycopg. Install requirements-lock.txt dependencies."
+            "PostgreSQL model registry requires psycopg. "
+            "Install requirements-lock.txt dependencies."
         ) from exc
     return psycopg.connect(dsn)
 

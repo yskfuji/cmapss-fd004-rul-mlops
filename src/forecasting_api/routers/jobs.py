@@ -1,9 +1,10 @@
 from __future__ import annotations
 
 from collections.abc import Callable
-from typing import Any, Literal
+from typing import Any
 
 from fastapi import APIRouter, BackgroundTasks, Depends
+
 from forecasting_api.job_dispatcher import JobEnqueuerFactory
 from forecasting_api.schemas import (
     JobCreateRequest,
