@@ -4,7 +4,7 @@
 
 NASA CMAPSS FD004 Remaining Useful Life 予測のための公開ポートフォリオ用リポジトリです。
 
-英語版の入口は [README.md](README.md) です。このファイルは日本語で、公開範囲、再現方法、運用面の要点を短く把握できるようにまとめています。
+**言語:** [English](README.md) | 日本語
 
 ## ポートフォリオ版
 

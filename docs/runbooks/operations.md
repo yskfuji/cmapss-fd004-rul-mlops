@@ -1,6 +1,6 @@
 # RULFM Runbook
 
-Language note: this is the English-primary operations runbook. 🇯🇵 Japanese companion → [operations.ja.md](operations.ja.md)
+**Language:** English | [Japanese](operations.ja.md)
 
 ## Minimum paths first
 

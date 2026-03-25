@@ -1,6 +1,6 @@
 # RULFM Runbook
 
-このファイルは運用 runbook の日本語版です。🇬🇧 English version → [operations.md](operations.md)
+**言語:** [English](operations.md) | 日本語
 
 ## 最小パス優先
 

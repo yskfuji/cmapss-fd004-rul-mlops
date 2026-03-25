@@ -1,6 +1,6 @@
 # Architecture Overview
 
-Language note: this file preserves the original mixed-language architecture notes. 🇬🇧 English companion → [overview.en.md](overview.en.md)
+**Language:** [English](overview.en.md) | Japanese/mixed
 
 CMAPSS FD004 RUL MLOps — システム全体図とコンポーネント設計
 
