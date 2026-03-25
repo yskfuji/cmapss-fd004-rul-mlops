@@ -1,6 +1,7 @@
 # cmapss-fd004-rul-mlops
 
-[![CI](https://github.com/yusukefujinami/cmapss-fd004-rul-mlops/actions/workflows/ci-stable.yml/badge.svg)](https://github.com/yusukefujinami/cmapss-fd004-rul-mlops/actions/workflows/ci-stable.yml)
+[![Stable CI](https://github.com/yusukefujinami/cmapss-fd004-rul-mlops/actions/workflows/ci-stable.yml/badge.svg)](https://github.com/yusukefujinami/cmapss-fd004-rul-mlops/actions/workflows/ci-stable.yml)
+[![Experimental CI](https://github.com/yusukefujinami/cmapss-fd004-rul-mlops/actions/workflows/ci-experimental.yml/badge.svg)](https://github.com/yusukefujinami/cmapss-fd004-rul-mlops/actions/workflows/ci-experimental.yml)
 
 NASA CMAPSS FD004 の Remaining Useful Life 予測を題材にした、公開ポートフォリオ向けのリポジトリです。
 
@@ -27,21 +28,19 @@ NASA CMAPSS FD004 の Remaining Useful Life 予測を題材にした、公開ポ
 
 このリポジトリには、CI、CD、そして複数レイヤーのテストが含まれています。
 
-- CI: `.github/workflows/ci-stable.yml`
-  - lint、security audit、typecheck、stable test、PostgreSQL compose integration、benchmark check、DVC dry-run、e2e へ続く後段ジョブを実行します
-- Experimental CI: `.github/workflows/ci-experimental.yml`
-  - torch / hybrid 系の experimental model 向けテストと、対象を絞った coverage gate を実行します
-- CD: `.github/workflows/cd.yml`
-  - GHCR への image build / publish、Cloud Run への deploy、deploy 後の smoke check を実行します
-- テストスイート:
-  - unit: `tests/unit/`
-  - integration: `tests/integration/`
-  - monitoring: `tests/monitoring/`
-  - regression: `tests/regression/`
-  - frontend: `tests/frontend/`
-  - e2e: `tests/e2e/`
+| 対象 | 内容 |
+|---|---|
+| `.github/workflows/ci-stable.yml` | lint、security audit、typecheck、stable test、PostgreSQL compose integration、benchmark check、DVC dry-run、e2e へ続く後段ジョブを実行します |
+| `.github/workflows/ci-experimental.yml` | torch / hybrid 系の experimental model 向けテストと、対象を絞った coverage gate を実行します |
+| `.github/workflows/cd.yml` | GHCR への image build / publish、Cloud Run への deploy、deploy 後の smoke check を実行します |
+| `tests/unit/` | helper、service、runtime utility、model adapter などの unit test を収めています |
+| `tests/integration/` | API、job-store、PostgreSQL、各 endpoint の integration test を収めています |
+| `tests/monitoring/` | drift、metrics 描画、monitoring 永続化の確認を行います |
+| `tests/regression/` | benchmark artifact の回帰閾値を確認します |
+| `tests/frontend/` | ブラウザ側 controller の test を収めています |
+| `tests/e2e/` | Playwright による smoke test と UI フロー検証を収めています |
 
-手早く確認したい場合は、この README 冒頭の CI バッジから stable workflow を見るのが最短です。上に挙げた各テストディレクトリは、そのまま GitHub Actions で実行している検証レイヤーに対応しています。
+手早く確認したい場合は、この README 冒頭のバッジから stable / experimental workflow を見るのが最短です。上に挙げたパスは、そのまま GitHub Actions で実行している検証レイヤーに対応しています。
 
 ## 公開ベンチマークの要点
 

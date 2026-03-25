@@ -1,6 +1,7 @@
 # cmapss-fd004-rul-mlops
 
-[![CI](https://github.com/yusukefujinami/cmapss-fd004-rul-mlops/actions/workflows/ci-stable.yml/badge.svg)](https://github.com/yusukefujinami/cmapss-fd004-rul-mlops/actions/workflows/ci-stable.yml)
+[![Stable CI](https://github.com/yusukefujinami/cmapss-fd004-rul-mlops/actions/workflows/ci-stable.yml/badge.svg)](https://github.com/yusukefujinami/cmapss-fd004-rul-mlops/actions/workflows/ci-stable.yml)
+[![Experimental CI](https://github.com/yusukefujinami/cmapss-fd004-rul-mlops/actions/workflows/ci-experimental.yml/badge.svg)](https://github.com/yusukefujinami/cmapss-fd004-rul-mlops/actions/workflows/ci-experimental.yml)
 
 Public portfolio repository for NASA CMAPSS FD004 Remaining Useful Life forecasting.
 
@@ -38,21 +39,19 @@ If you only want the public benchmark path, read these first:
 
 This repository includes CI, CD, and multiple test layers.
 
-- CI: `.github/workflows/ci-stable.yml`
-    - lint, security audit, typecheck, stable tests, PostgreSQL compose integration, benchmark checks, DVC dry-run, and e2e follow-up jobs
-- Experimental CI: `.github/workflows/ci-experimental.yml`
-    - experimental torch and hybrid model tests with focused coverage gates
-- CD: `.github/workflows/cd.yml`
-    - GHCR image build/publish, Cloud Run deploy, and post-deploy smoke checks
-- Test suites:
-    - unit: `tests/unit/`
-    - integration: `tests/integration/`
-    - monitoring: `tests/monitoring/`
-    - regression: `tests/regression/`
-    - frontend: `tests/frontend/`
-    - e2e: `tests/e2e/`
+| Surface | What it covers |
+|---|---|
+| `.github/workflows/ci-stable.yml` | lint, security audit, typecheck, stable tests, PostgreSQL compose integration, benchmark checks, DVC dry-run, and e2e follow-up jobs |
+| `.github/workflows/ci-experimental.yml` | experimental torch and hybrid model tests with focused coverage gates |
+| `.github/workflows/cd.yml` | GHCR image build/publish, Cloud Run deploy, and post-deploy smoke checks |
+| `tests/unit/` | unit tests for helpers, services, runtime utilities, and model adapters |
+| `tests/integration/` | API, job-store, PostgreSQL, and endpoint integration tests |
+| `tests/monitoring/` | drift, metrics rendering, and monitoring persistence checks |
+| `tests/regression/` | benchmark artifact regression thresholds |
+| `tests/frontend/` | browser-side controller tests |
+| `tests/e2e/` | Playwright smoke and UI flow coverage |
 
-If you want a quick proof point, the CI badge at the top of this README points to the stable workflow, and the test directories above map directly to the layers exercised in GitHub Actions.
+If you want a quick proof point, the badges at the top of this README link directly to the stable and experimental workflows, and the paths above map to the validation layers exercised in GitHub Actions.
 
 ## What this project demonstrates
 
