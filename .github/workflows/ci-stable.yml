@@ -134,6 +134,9 @@ jobs:
     runs-on: ubuntu-latest
     needs: [lint, security, typecheck]
     env:
+      RULFM_FORECASTING_API_KEY: ci-compose-key
+      GF_SECURITY_ADMIN_USER: ci-admin
+      GF_SECURITY_ADMIN_PASSWORD: ci-admin-password
       RULFM_TEST_POSTGRES_PASSWORD: ${{ github.run_id }}-${{ github.run_attempt }}-postgres
     steps:
       - uses: actions/checkout@v4
