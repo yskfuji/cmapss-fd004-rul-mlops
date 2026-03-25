@@ -28,7 +28,7 @@
 | 1 | `/v1/train` public `gbdt_hgb_v1` path | accepted response plus persisted artifact metadata |
 | 2 | `/v1/forecast` with trained `gbdt_hgb_v1` model | non-naive predictions and interval payload |
 | 3 | `/v1/backtest` with trained `gbdt_hgb_v1` model | expected metric payload shape |
-| 4 | experimental model gate | AFNO/hybrid algo rejected unless `RULFM_ENABLE_EXPERIMENTAL_MODELS=1` |
+| 4 | experimental model gate | experimental/hybrid algo rejected unless `RULFM_ENABLE_EXPERIMENTAL_MODELS=1` |
 | 5 | benchmark artifact smoke/regression | committed JSON remains within public KPI thresholds |
 
 ### Guardrails

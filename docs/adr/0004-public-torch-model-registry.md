@@ -8,8 +8,8 @@ experimental benchmark support 向けに採用
 
 ## Context / 背景
 
-The proprietary temporal model registry (`src.models.registry`) contains AFNOcG3 and related
-architectures that are omitted from the public repository pending patent filing.
+The proprietary temporal model registry (`src.models.registry`) contains research-stage
+architectures that are omitted from the public repository pending publication.
 The benchmark script (`scripts/build_fd004_benchmark_summary.py`) imports from this registry
 via `torch_forecasters.py`; when the registry is absent the import raises `ModuleNotFoundError`,
 causing all torch benchmark rows to fall back to a flat Ridge surrogate
@@ -25,7 +25,7 @@ Two options were evaluated:
 **Option A — Public surrogate registry**
 Create `src/models/registry.py` with BiLSTM, TCN, and Transformer RUL implementations that
 satisfy the same `build` / `load_from_snapshot` / `extras` contract expected by
-`torch_forecasters.py`. AFNO variants raise `ModuleNotFoundError(name="src.models.registry")`
+`torch_forecasters.py`. Proprietary model variants raise `ModuleNotFoundError(name="src.models.registry")`
 to preserve the existing fallback path.
 
 **Option B — Optional dependency gate**
@@ -44,7 +44,7 @@ Rationale:
   produces meaningful, reproducible metrics for the asymmetric-loss comparison.
 - Option B only documents absence; Option A produces actual results that a reviewer can
   inspect and reproduce.
-- The AFNO-specific `ModuleNotFoundError` with `name="src.models.registry"` is preserved so
+- The proprietary-model-specific `ModuleNotFoundError` with `name="src.models.registry"` is preserved so
   `torch_forecasters.py` can distinguish "known proprietary model absent" from "unknown key"
   without code changes in the existing fallback path.
 
@@ -55,7 +55,7 @@ Rationale:
 - `_TCNRUL` — dilated causal conv residual blocks + global avg pool + linear head
 - `_TransformerRUL` — sinusoidal PE + `TransformerEncoder` + linear head
 - `_ModelHandlers` — `build` / `load_from_snapshot` / `extras` contract
-- `get_model_handlers(algo_key)` — raises `ModuleNotFoundError` for AFNO variants,
+- `get_model_handlers(algo_key)` — raises `ModuleNotFoundError` for proprietary model variants,
   `ValueError` for unknown keys
 
 ## Consequences / 帰結

@@ -121,7 +121,6 @@ Experimental full benchmark rows require both the experimental dependency set an
 pip install -r requirements-experimental-lock.txt
 RULFM_ENABLE_EXPERIMENTAL_MODELS=1 \
 RULFM_BENCHMARK_STAGE=full \
-RULFM_BENCHMARK_ENABLE_AFNO=1 \
 PYTHONPATH=src python scripts/build_fd004_benchmark_summary.py
 ```
 

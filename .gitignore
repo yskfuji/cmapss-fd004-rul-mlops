@@ -41,8 +41,8 @@ src/forecasting_api/data/model_artifacts/
 # Auto-generated API spec (regenerate via scripts or FastAPI /openapi.json endpoint)
 docs/api/openapi.json
 
-# Portfolio figures (binary PNGs committed intentionally; ignore local regeneration artifacts)
-# figures/ is tracked — do NOT add it here
+# Portfolio figures (paper submission assets — not published in public repo)
+figures/
 
 # Personal experiment reference material moved to ../_dev_only/
 docs/references/

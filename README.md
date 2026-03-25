@@ -186,7 +186,6 @@ Experimental full benchmark with public torch surrogates:
 pip install -r requirements-experimental-lock.txt
 RULFM_ENABLE_EXPERIMENTAL_MODELS=1 \
 RULFM_BENCHMARK_STAGE=full \
-RULFM_BENCHMARK_ENABLE_AFNO=1 \
 RULFM_FORECASTING_TORCH_MAX_EPOCHS=20 \
 PYTHONPATH=src python scripts/build_fd004_benchmark_summary.py
 ```
