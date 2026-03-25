@@ -1,0 +1,153 @@
+name: cd
+
+on:
+  workflow_run:
+    workflows: [ci-stable]
+    types: [completed]
+    branches: [main, master]
+  workflow_dispatch:
+
+jobs:
+  build-and-publish:
+    if: ${{ github.event_name == 'workflow_dispatch' || (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push') }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+      packages: write
+    outputs:
+      image: ${{ steps.meta.outputs.tags }}
+      deploy_image: ${{ steps.deploy_image.outputs.value }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_sha || github.sha }}
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Compute image metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/${{ github.repository_owner }}/arcayf-forecasting-api
+          tags: |
+            type=sha,prefix=sha-,format=short,priority=1000
+            type=raw,value=latest,enable={{is_default_branch}},priority=100
+      - name: Resolve deploy image reference
+        id: deploy_image
+        shell: bash
+        env:
+          META_TAGS: ${{ steps.meta.outputs.tags }}
+        run: |
+          deploy_image="$(printf '%s\n' "$META_TAGS" | grep -E ':sha-[[:alnum:]]+$' | head -n 1)"
+          if [[ -z "$deploy_image" ]]; then
+            echo "Failed to resolve sha-tagged image from metadata-action outputs" >&2
+            exit 1
+          fi
+          echo "value=$deploy_image" >> "$GITHUB_OUTPUT"
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+
+  deploy-cloud-run:
+    runs-on: ubuntu-latest
+    needs: build-and-publish
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - name: Validate deployment configuration
+        env:
+          GCP_WORKLOAD_IDENTITY_PROVIDER: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          GCP_SERVICE_ACCOUNT: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+          GCP_PROJECT_ID: ${{ vars.GCP_PROJECT_ID }}
+          GCP_REGION: ${{ vars.GCP_REGION }}
+          CD_SMOKE_API_KEY: ${{ secrets.CD_SMOKE_API_KEY }}
+          CD_SMOKE_TENANT_ID: ${{ vars.CD_SMOKE_TENANT_ID }}
+        run: |
+          missing=""
+          [[ -z "$GCP_WORKLOAD_IDENTITY_PROVIDER" ]] && missing="$missing GCP_WORKLOAD_IDENTITY_PROVIDER"
+          [[ -z "$GCP_SERVICE_ACCOUNT" ]] && missing="$missing GCP_SERVICE_ACCOUNT"
+          [[ -z "$GCP_PROJECT_ID" ]] && missing="$missing GCP_PROJECT_ID"
+          [[ -z "$GCP_REGION" ]] && missing="$missing GCP_REGION"
+          [[ -z "$CD_SMOKE_API_KEY" ]] && missing="$missing CD_SMOKE_API_KEY"
+          [[ -z "$CD_SMOKE_TENANT_ID" ]] && missing="$missing CD_SMOKE_TENANT_ID"
+          if [[ -n "$missing" ]]; then
+            echo "Missing required Cloud Run deployment settings:$missing" >&2
+            exit 1
+          fi
+      - uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+      - uses: google-github-actions/setup-gcloud@v2
+      - name: Deploy to Cloud Run
+        shell: bash
+        run: |
+          gcloud run deploy arcayf-forecasting-api \
+            --project "${{ vars.GCP_PROJECT_ID }}" \
+            --region "${{ vars.GCP_REGION }}" \
+            --image "${{ needs.build-and-publish.outputs.deploy_image }}" \
+            --platform managed \
+            --no-allow-unauthenticated
+      - name: Verify Cloud Run service readiness
+        run: |
+          ready_status="$(gcloud run services describe arcayf-forecasting-api \
+            --project "${{ vars.GCP_PROJECT_ID }}" \
+            --region "${{ vars.GCP_REGION }}" \
+            --format='value(status.conditions[type="Ready"].status)')"
+          if [[ "$ready_status" != "True" ]]; then
+            echo "Cloud Run service is not Ready after deployment" >&2
+            gcloud run services describe arcayf-forecasting-api \
+              --project "${{ vars.GCP_PROJECT_ID }}" \
+              --region "${{ vars.GCP_REGION }}"
+            exit 1
+          fi
+      - name: Smoke test health endpoint
+        env:
+          GCP_CLOUD_RUN_HEALTHCHECK_URL: ${{ vars.GCP_CLOUD_RUN_HEALTHCHECK_URL }}
+        run: |
+          service_url="$(gcloud run services describe arcayf-forecasting-api \
+            --project "${{ vars.GCP_PROJECT_ID }}" \
+            --region "${{ vars.GCP_REGION }}" \
+            --format='value(status.url)')"
+          target_url="${GCP_CLOUD_RUN_HEALTHCHECK_URL:-$service_url}"
+          if [[ -z "$target_url" ]]; then
+            echo "Unable to determine a health check URL for Cloud Run" >&2
+            exit 1
+          fi
+          identity_token="$(gcloud auth print-identity-token)"
+          curl --fail --show-error --silent \
+            --retry 3 \
+            --retry-all-errors \
+            --retry-delay 2 \
+            -H "Authorization: Bearer ${identity_token}" \
+            "${target_url%/}/health"
+      - name: Smoke test authenticated API and UI surface
+        env:
+          GCP_CLOUD_RUN_HEALTHCHECK_URL: ${{ vars.GCP_CLOUD_RUN_HEALTHCHECK_URL }}
+          CD_SMOKE_API_KEY: ${{ secrets.CD_SMOKE_API_KEY }}
+          CD_SMOKE_TENANT_ID: ${{ vars.CD_SMOKE_TENANT_ID }}
+          CD_SMOKE_CONNECTION_TYPE: ${{ vars.CD_SMOKE_CONNECTION_TYPE }}
+          CD_SMOKE_X_FORWARDED_FOR: ${{ vars.CD_SMOKE_X_FORWARDED_FOR }}
+        run: |
+          service_url="$(gcloud run services describe arcayf-forecasting-api \
+            --project "${{ vars.GCP_PROJECT_ID }}" \
+            --region "${{ vars.GCP_REGION }}" \
+            --format='value(status.url)')"
+          target_url="${GCP_CLOUD_RUN_HEALTHCHECK_URL:-$service_url}"
+          identity_token="$(gcloud auth print-identity-token)"
+
+          DEPLOY_BASE_URL="${target_url%/}" \
+          DEPLOY_IDENTITY_TOKEN="$identity_token" \
+          DEPLOY_API_KEY="$CD_SMOKE_API_KEY" \
+          DEPLOY_TENANT_ID="$CD_SMOKE_TENANT_ID" \
+          DEPLOY_CONNECTION_TYPE="${CD_SMOKE_CONNECTION_TYPE:-private}" \
+          DEPLOY_X_FORWARDED_FOR="${CD_SMOKE_X_FORWARDED_FOR:-10.0.0.10}" \
+          bash scripts/run_deploy_smoke.sh

@@ -1,0 +1,6 @@
+[core]
+    analytics = false
+    remote = gcs
+
+[remote "gcs"]
+    url = gs://arcayf-cmapss-fd004-dvc

@@ -1,0 +1,13 @@
+{
+  "name": "cmapss-fd004-rul-mlops",
+  "version": "0.0.0",
+  "description": "Frontend regression harness for the CMAPSS FD004 RUL MLOps portfolio",
+  "scripts": {
+    "test:e2e": "playwright test",
+    "test:unit:frontend": "node --test tests/frontend/results_visual_controller.test.mjs tests/frontend/results_insights_controller.test.mjs tests/frontend/results_tables_controller.test.mjs tests/frontend/jobs_models_controller.test.mjs tests/frontend/billing_help_controller.test.mjs tests/frontend/task_results_ui_controller.test.mjs tests/frontend/progress_gate_controller.test.mjs"
+  },
+  "devDependencies": {
+    "jsdom": "^29.0.1",
+    "playwright": "^1.58.2"
+  }
+}

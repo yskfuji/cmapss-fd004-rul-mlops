@@ -1,0 +1,48 @@
+__pycache__/
+.ipynb_checkpoints/
+*.pyc
+*.pyo
+.venv/
+.tmp/
+node_modules/
+test-results/
+.coverage
+.coverage.*
+.env
+*.env
+.lock
+.*.lock
+catboost_info/
+mlruns/
+*.pt
+*.npy
+*.parquet
+.DS_Store
+runtime/*
+!runtime/.gitkeep
+!runtime/README.md
+
+# Tool caches
+.benchmark_cache/
+.mypy_cache/
+.ruff_cache/
+.vscode/
+infra/terraform/.terraform/
+
+# Runtime state that may leak into src/ from local runs
+src/forecasting_api/data/trained_models.db
+src/forecasting_api/data/trained_models.db-shm
+src/forecasting_api/data/trained_models.db-wal
+src/forecasting_api/data/trained_models.json
+src/forecasting_api/data/model_promotions.json
+src/forecasting_api/data/request_audit_log.jsonl
+src/forecasting_api/data/model_artifacts/
+
+# Auto-generated API spec (regenerate via scripts or FastAPI /openapi.json endpoint)
+docs/api/openapi.json
+
+# Portfolio figures (binary PNGs committed intentionally; ignore local regeneration artifacts)
+# figures/ is tracked — do NOT add it here
+
+# Personal experiment reference material moved to ../_dev_only/
+docs/references/

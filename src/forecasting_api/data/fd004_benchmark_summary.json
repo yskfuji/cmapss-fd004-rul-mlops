@@ -1,0 +1,153 @@
+{
+  "generated_at": "2026-03-24T05:09:28.072427+00:00",
+  "benchmark_stage": "gbdt-only",
+  "phase": "gbdt-only",
+  "gbdt_preset": "full",
+  "train_profile": "fd004_full_cycles",
+  "backtest_profile": "fd004_backtest_multiunit",
+  "window": 30,
+  "features": 24,
+  "feature_keys": [
+    "sensor_1",
+    "sensor_10",
+    "sensor_11",
+    "sensor_12",
+    "sensor_13",
+    "sensor_14",
+    "sensor_15",
+    "sensor_16",
+    "sensor_17",
+    "sensor_18",
+    "sensor_19",
+    "sensor_2",
+    "sensor_20",
+    "sensor_21",
+    "sensor_3",
+    "sensor_4",
+    "sensor_5",
+    "sensor_6",
+    "sensor_7",
+    "sensor_8",
+    "sensor_9"
+  ],
+  "horizon": 15,
+  "folds": 2,
+  "rows": [
+    {
+      "model": "GBDT_w30_f24",
+      "rmse": 15.159395253202572,
+      "mae": 10.446739814112023,
+      "nasa_score": 968.329900576914,
+      "cov90": 0.9113924050632911,
+      "width90": 60.20116986183352,
+      "interval_method": "quantile_boosting_90",
+      "source": "fd004_benchmark",
+      "scope": "standard CMAPSS evaluation: final-cycle RUL per engine",
+      "comparability": "same_protocol",
+      "bias": -2.213037558742268,
+      "overprediction_rate": 0.4472573839662447,
+      "overprediction_mean": 9.204657710012418,
+      "low_rul_count_30": 53.0,
+      "low_rul_rmse_30": 5.960357372617662,
+      "low_rul_nasa_score_30": 37.283935722283644,
+      "low_rul_count_60": 91.0,
+      "low_rul_rmse_60": 8.52964428793016,
+      "low_rul_nasa_score_60": 115.11744974982068
+    }
+  ],
+  "experiments": {
+    "fd004_gbdt_w30_f24": {
+      "preset": "full",
+      "ensemble_enabled": false,
+      "feature_dim": 570,
+      "samples": 53779,
+      "validation_rmse": 14.1818799082109,
+      "ensemble_validation_rmse": 14.1818799082109,
+      "best_params": {
+        "max_iter": 500,
+        "learning_rate": 0.025,
+        "max_depth": 7,
+        "max_leaf_nodes": 127,
+        "min_samples_leaf": 4
+      },
+      "interval_method": "quantile_boosting_90",
+      "interval_params": {
+        "max_iter": 350,
+        "learning_rate": 0.04,
+        "max_depth": 6,
+        "max_leaf_nodes": 63,
+        "min_samples_leaf": 5
+      },
+      "interval_quantiles": [
+        0.03,
+        0.97
+      ],
+      "interval_scale": 1.3,
+      "interval_validation_cov90": 0.9166666666666666,
+      "interval_validation_width90": 66.21944096146161,
+      "interval_calibration_protocol": "heldout_unit_proxy_final_cycle",
+      "interval_calibration_units": 24,
+      "interval_calibration_rows": 24,
+      "interval_calibration_target_mean": 75.04166666666667,
+      "interval_calibration_target_p50": 84.5,
+      "interval_calibration_holdout_fraction": 0.0963855421686747,
+      "interval_calibration_requested_holdout_fraction": 0.1,
+      "interval_calibration_min_holdout_series": 8,
+      "interval_calibration_max_holdout_series": 24,
+      "backtest_rmse": 15.159395253202572,
+      "backtest_mae": 10.446739814112023,
+      "backtest_nasa_score": 968.329900576914,
+      "backtest_count": 237.0,
+      "backtest_cov90": 0.9113924050632911,
+      "backtest_width90": 60.20116986183352,
+      "backtest_bias": -2.213037558742268,
+      "backtest_overprediction_rate": 0.4472573839662447,
+      "backtest_overprediction_mean": 9.204657710012418,
+      "backtest_low_rul_count_30": 53.0,
+      "backtest_low_rul_rmse_30": 5.960357372617662,
+      "backtest_low_rul_nasa_score_30": 37.283935722283644,
+      "backtest_low_rul_count_60": 91.0,
+      "backtest_low_rul_rmse_60": 8.52964428793016,
+      "backtest_low_rul_nasa_score_60": 115.11744974982068
+    }
+  },
+  "diagnostics": {
+    "distribution_shift": null,
+    "uncertainty": [
+      {
+        "model": "GBDT_w30_f24",
+        "cov90": 0.9113924050632911,
+        "width90": 60.20116986183352,
+        "interval_method": "quantile_boosting_90"
+      }
+    ],
+    "xai_stability": [],
+    "architecture_ablations": [],
+    "uncertainty_quality": [],
+    "harder_ood": {},
+    "soft_gate_pareto": {},
+    "evaluation": {
+      "rmse": "sqrt(mean((y_hat - y)^2))",
+      "nasa_score": "error = y_hat - y; exp(-error/13)-1 for error<0 else exp(error/10)-1",
+      "bias": "mean(y_hat - y)",
+      "overprediction_rate": "mean(y_hat > y)",
+      "overprediction_mean": "mean(y_hat - y | y_hat > y)",
+      "low_rul_rmse_30": "rmse restricted to y <= 30",
+      "low_rul_rmse_60": "rmse restricted to y <= 60",
+      "low_rul_nasa_score_30": "nasa_score restricted to y <= 30",
+      "low_rul_nasa_score_60": "nasa_score restricted to y <= 60",
+      "cov90": "mean(lower_90 <= y <= upper_90)",
+      "width90": "mean(upper_90 - lower_90)"
+    }
+  },
+  "notes": [
+    "Benchmark reset to NASA CMAPSS-style evaluation with RMSE and asymmetric NASA score.",
+    "Input is fixed to window=30 and 24 exogenous features (op settings + sensors, cycle excluded).",
+    "GBDT now logs 90% intervals via quantile boosting and reports coverage/width.",
+    "Summary snapshot written after the gbdt-only phase so benchmark progress is persisted incrementally.",
+    "Benchmark stage=gbdt-only, gbdt_preset=full, gbdt_ensemble_enabled=False, afno_enabled=False.",
+    "Stage matrix: gbdt-only writes the GBDT baseline snapshot and exits; full continues into SOTA stages after persisting the GBDT baseline, with AFNO stages gated behind RULFM_BENCHMARK_ENABLE_AFNO=1.",
+    "AFNO benchmark stages are skipped by default in the public full run so the summary artifact can complete deterministically; set RULFM_BENCHMARK_ENABLE_AFNO=1 to opt back in.",
+    "GBDT interval calibration uses heldout_unit_proxy_final_cycle on held-out training units instead of all sliding-window rows."
+  ]
+}

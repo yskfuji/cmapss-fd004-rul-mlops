@@ -1,0 +1,90 @@
+[build-system]
+requires = ["setuptools>=69", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "cmapss-fd004-rul-mlops"
+version = "0.0.0"
+description = "Public GBDT RUL forecasting reference with operational control-plane patterns for NASA CMAPSS FD004"
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+authors = [
+  { name = "Yusuke Fujinami" }
+]
+dependencies = [
+  "fastapi==0.135.2",
+  "uvicorn[standard]==0.34.0",
+  "pydantic==2.10.6",
+  "numpy==2.2.3",
+  "scikit-learn==1.6.1",
+  "scipy==1.15.2",
+  "httpx==0.28.1",
+  "PyJWT==2.12.1",
+  "joblib==1.4.2",
+  "prometheus-client==0.21.1",
+  "mlflow==3.10.1",
+  "starlette==0.49.3",
+  "psycopg[binary]==3.2.6",
+  "google-cloud-kms==3.1.0",
+  "dvc==3.59.1",
+  "lightgbm==4.6.0",
+  "catboost==1.2.8",
+]
+
+[project.optional-dependencies]
+experimental = [
+  "torch==2.8.0",
+]
+dev = [
+  "pytest==8.3.5",
+  "pytest-cov==6.0.0",
+  "pytest-asyncio==0.25.3",
+  "ruff==0.9.7",
+  "mypy==1.15.0",
+]
+
+[project.scripts]
+rulfm-forecasting-cli = "forecasting_api.client_cli:main"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["forecasting_api*", "enterprise*", "models*", "monitoring*"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]
+addopts = "-q --cov=src --cov-report=term-missing --cov-fail-under=72 -p no:dash"
+asyncio_default_fixture_loop_scope = "function"
+markers = [
+  "experimental: tests for torch and other experimental model paths",
+]
+
+[tool.coverage.run]
+omit = [
+  "src/forecasting_api/torch_forecasters.py",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP"]
+
+[tool.ruff.lint.per-file-ignores]
+"src/forecasting_api/client.py" = ["E501"]
+"src/forecasting_api/client_cli.py" = ["B904", "E501", "F541"]
+"src/forecasting_api/cmapss_family.py" = ["E501", "I001", "UP017"]
+"src/forecasting_api/cmapss_fd004.py" = ["E501"]
+"src/forecasting_api/app.py" = ["E501", "E741", "UP034", "UP038"]
+"src/models/gbdt_pipeline.py" = ["E501", "UP038"]
+"scripts/build_fd004_benchmark_summary.py" = ["B007", "B905", "E402", "E501", "F841", "I001", "UP017", "UP038"]
+
+[tool.mypy]
+python_version = "3.11"
+warn_unused_configs = true
+ignore_missing_imports = true
