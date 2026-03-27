@@ -1,7 +1,7 @@
 # cmapss-fd004-rul-mlops
 
-[![Stable CI](https://github.com/yusukefujinami/cmapss-fd004-rul-mlops/actions/workflows/ci-stable.yml/badge.svg)](https://github.com/yusukefujinami/cmapss-fd004-rul-mlops/actions/workflows/ci-stable.yml)
-[![Experimental CI](https://github.com/yusukefujinami/cmapss-fd004-rul-mlops/actions/workflows/ci-experimental.yml/badge.svg)](https://github.com/yusukefujinami/cmapss-fd004-rul-mlops/actions/workflows/ci-experimental.yml)
+[![Stable CI](https://github.com/yskfuji/cmapss-fd004-rul-mlops/actions/workflows/ci-stable.yml/badge.svg)](https://github.com/yskfuji/cmapss-fd004-rul-mlops/actions/workflows/ci-stable.yml)
+[![Experimental CI](https://github.com/yskfuji/cmapss-fd004-rul-mlops/actions/workflows/ci-experimental.yml/badge.svg)](https://github.com/yskfuji/cmapss-fd004-rul-mlops/actions/workflows/ci-experimental.yml)
 
 Public portfolio repository for NASA CMAPSS FD004 Remaining Useful Life forecasting.
 
