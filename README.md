@@ -93,7 +93,7 @@ Root-cause note: earlier public snapshots trained on truncated history and colla
 
 ## Public architecture
 
-<p align="center"><img src="figures/fig1_architecture.png" alt="Architecture" width="100%" /></p>
+<p align="center"><img src="docs/assets/architecture.png" alt="Architecture" width="100%" /></p>
 
 Default public flow:
 
