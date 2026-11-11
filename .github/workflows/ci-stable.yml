@@ -255,7 +255,9 @@ jobs:
         run: python -m dvc repro --dry
 
   e2e:
-    runs-on: ubuntu-latest
+    # Pin away from ubuntu-latest (26.04): Playwright --with-deps apt fetches
+    # have been flaky there (DNS/mirror failures) even after Playwright 1.65.
+    runs-on: ubuntu-24.04
     needs: [test, benchmark-artifact-regression]
     steps:
       - uses: actions/checkout@v4
