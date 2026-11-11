@@ -5,6 +5,8 @@
 
 Public portfolio repository for NASA CMAPSS FD004 Remaining Useful Life forecasting.
 
+> Research / portfolio reference implementation. Not a production SLA claim.
+
 **Language:** English | [Japanese](README.ja.md)
 
 ## Portfolio release
@@ -91,7 +93,7 @@ Root-cause note: earlier public snapshots trained on truncated history and colla
 
 ## Public architecture
 
-![Architecture](figures/fig1_architecture.png)
+<p align="center"><img src="figures/fig1_architecture.png" alt="Architecture" width="100%" /></p>
 
 Default public flow:
 
