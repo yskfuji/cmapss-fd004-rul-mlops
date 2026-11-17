@@ -1,0 +1,15 @@
+benchmark:
+  training_hours: 0.05
+  target_dataset: FD004
+  train_profile: fd004_full_cycles
+  backtest_profile: fd004_backtest_multiunit
+  stage: gbdt-only
+  gbdt_preset: full
+  gbdt_window: 30
+  exogenous_feature_count: 24
+  max_rul: 125
+  horizon: 15
+  enable_gbdt_ensemble: false
+drift:
+  psi_bins: 10
+  minimum_samples_per_feature: 50

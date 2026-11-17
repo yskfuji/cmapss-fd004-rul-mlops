@@ -1,0 +1,92 @@
+name: drift-report
+
+# Runs weekly (Monday 00:00 UTC) or on manual dispatch.
+#
+# Prerequisites — set these in repository Settings → Secrets and Variables:
+#   Secrets:
+#     RULFM_DRIFT_API_URL   Base URL of the deployed Forecasting API
+#     RULFM_DRIFT_API_KEY   x-api-key value for the drift endpoint
+#   Variables (optional override):
+#     RULFM_DRIFT_CANDIDATE_FILE  Path to candidate records JSON (default: see below)
+#
+# Candidate file:
+#   The candidate records JSON must be accessible inside the runner.
+#   Default path is src/forecasting_api/data/drift_candidate_records.json,
+#   which is committed as a reference sample.  For production use, supply a
+#   path to a freshly exported file via RULFM_DRIFT_CANDIDATE_FILE or the
+#   workflow_dispatch input below.
+#
+# Behaviour when secrets are not configured:
+#   - schedule: job is skipped with an explanatory message (no failure noise).
+#   - workflow_dispatch: job fails fast so the operator knows what is missing.
+
+on:
+  workflow_dispatch:
+    inputs:
+      candidate_file:
+        description: Path to the JSON file containing candidate records.
+        required: false
+        default: src/forecasting_api/data/drift_candidate_records.json
+  schedule:
+    - cron: '0 0 * * 1'
+
+jobs:
+  drift:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check required secrets
+        id: secrets_check
+        env:
+          RULFM_DRIFT_API_URL: ${{ secrets.RULFM_DRIFT_API_URL }}
+          RULFM_DRIFT_API_KEY: ${{ secrets.RULFM_DRIFT_API_KEY }}
+          TRIGGER: ${{ github.event_name }}
+        run: |
+          missing=""
+          [[ -z "$RULFM_DRIFT_API_URL" ]] && missing="$missing RULFM_DRIFT_API_URL"
+          [[ -z "$RULFM_DRIFT_API_KEY" ]] && missing="$missing RULFM_DRIFT_API_KEY"
+          if [[ -n "$missing" ]]; then
+            if [[ "$TRIGGER" == "schedule" ]]; then
+              echo "secrets_missing=true" >> "$GITHUB_OUTPUT"
+              echo "::notice::Scheduled drift report skipped — secrets not configured:$missing"
+            else
+              echo "Missing required secrets:$missing" >&2
+              exit 1
+            fi
+          else
+            echo "secrets_missing=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/setup-python@v5
+        if: steps.secrets_check.outputs.secrets_missing != 'true'
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+          cache-dependency-path: requirements-lock.txt
+
+      - name: Install dependencies
+        if: steps.secrets_check.outputs.secrets_missing != 'true'
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements-lock.txt
+
+      - name: Generate drift report via API
+        if: steps.secrets_check.outputs.secrets_missing != 'true'
+        env:
+          RULFM_DRIFT_API_URL: ${{ secrets.RULFM_DRIFT_API_URL }}
+          RULFM_DRIFT_API_KEY: ${{ secrets.RULFM_DRIFT_API_KEY }}
+          RULFM_DRIFT_CANDIDATE_FILE: ${{ github.event.inputs.candidate_file || vars.RULFM_DRIFT_CANDIDATE_FILE || 'src/forecasting_api/data/drift_candidate_records.json' }}
+        run: |
+          mkdir -p artifacts
+          PYTHONPATH=src python scripts/generate_drift_report.py \
+            --api-url "$RULFM_DRIFT_API_URL" \
+            --api-key "$RULFM_DRIFT_API_KEY" \
+            --candidate-file "$RULFM_DRIFT_CANDIDATE_FILE" \
+            --output artifacts/drift-report.json
+
+      - uses: actions/upload-artifact@v4
+        if: steps.secrets_check.outputs.secrets_missing != 'true'
+        with:
+          name: drift-report
+          path: artifacts/drift-report.json

@@ -1,0 +1,1273 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light dark" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self' https: http:; font-src 'self' data:; object-src 'none'; base-uri 'self'; frame-ancestors 'none'"
+    />
+    <title>CMAPSS FD004 RUL GUI</title>
+    <link rel="stylesheet" href="./styles.css?v=2026-02-17-4" />
+  </head>
+  <body>
+    <header class="header">
+      <div class="wrap">
+        <h1 class="visuallyHidden" data-i18n="ui.title"></h1>
+        <div class="headerRow">
+          <div>
+            <div class="title" data-i18n="ui.title" data-i18n-title="title.header.title"></div>
+            <div class="subtitle" data-i18n="ui.subtitle" data-i18n-title="title.header.subtitle"></div>
+          </div>
+
+          <div class="headerActions">
+            <a class="headerLink" href="/docs" data-i18n="nav.docs"></a>
+            <label class="lang">
+              <span data-i18n="field.language"></span>
+              <select id="langSelect" data-i18n-aria-label="field.language" data-i18n-title="title.language_select">
+                <option value="ja" data-i18n="option.language.ja"></option>
+                <option value="en" data-i18n="option.language.en"></option>
+              </select>
+            </label>
+            <label class="lang">
+              <span data-i18n="field.display_density"></span>
+              <select id="densityMode" data-i18n-aria-label="field.display_density" data-i18n-title="field.display_density">
+                <option value="basic" data-i18n="option.density.basic"></option>
+                <option value="detailed" data-i18n="option.density.detailed"></option>
+              </select>
+            </label>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main class="wrap">
+      <p class="stepIntro" data-i18n="step.intro"></p>
+      <div class="stepHeader"></div>
+      <nav class="stepNav" aria-label="Steps" data-i18n-aria-label="aria.steps_nav">
+        <div class="nextStepRow">
+          <span class="nextStepLabel" data-i18n="next.step.lead"></span>
+          <a id="nextStepLink" class="nextStepLink" href="#connectionCard">...</a>
+        </div>
+        <a href="#connectionCard" class="stepLink" data-step="1">
+          <span class="stepBadge">1</span>
+          <span data-i18n="nav.step.connection"></span>
+          <span class="stepState"></span>
+        </a>
+        <a href="#dataCard" class="stepLink" data-step="2">
+          <span class="stepBadge">2</span>
+          <span data-i18n="nav.step.data"></span>
+          <span class="stepState"></span>
+        </a>
+        <a href="#paramsCard" class="stepLink" data-step="3">
+          <span class="stepBadge">3</span>
+          <span data-i18n="nav.step.params"></span>
+          <span class="stepState"></span>
+        </a>
+        <a href="#resultsCard" class="stepLink" data-step="4">
+          <span class="stepBadge">4</span>
+          <span data-i18n="nav.step.results"></span>
+          <span class="stepState"></span>
+        </a>
+        <div class="stepProgress" role="progressbar" aria-label="Progress" data-i18n-aria-label="aria.progress_steps" aria-valuemin="0" aria-valuemax="4">
+          <div id="stepProgressBar" class="stepProgressBar" aria-hidden="true"></div>
+        </div>
+        <div class="quotaFlow">
+          <span class="quotaFlowLabel" data-i18n="billing.flow_label"></span>
+          <span id="quotaFlowValue" class="quotaFlowValue"></span>
+          <div class="quotaFlowBar" role="progressbar" aria-label="Quota usage" data-i18n-aria-label="aria.quota_flow" aria-valuemin="0" aria-valuemax="100">
+            <div id="quotaFlowBarFill" class="quotaFlowBarFill" aria-hidden="true"></div>
+          </div>
+          <div id="quotaFlowAlert" class="quotaFlowAlert" aria-live="polite"></div>
+        </div>
+      </nav>
+      <section class="card primary billingCard flowCard" id="connectionCard">
+        <h2>
+          <span data-i18n="section.connection"></span>
+        </h2>
+        <p class="sectionLead" data-i18n="section.connection.lead"></p>
+        <div class="grid">
+          <label class="field required">
+            <span data-i18n="field.api_key"></span>
+            <span class="badge required" data-i18n="badge.required"></span>
+            <div class="inputRow">
+              <input id="apiKey" type="password" data-i18n-aria-label="field.api_key" data-i18n-title="title.api_key" data-i18n-placeholder="placeholder.api_key" autocomplete="off" />
+              <button id="toggleApiKey" type="button" class="secondary" data-i18n="action.toggle_api_key"></button>
+            </div>
+            <div class="hint" data-i18n="hint.api_key_dev"></div>
+            <label class="checkbox">
+              <input id="rememberApiKey" type="checkbox" />
+              <span data-i18n="field.remember_api_key"></span>
+            </label>
+            <div class="actions">
+              <button id="clearStoredApiKey" type="button" class="secondary" data-i18n="action.clear_stored_api_key"></button>
+            </div>
+            <div class="hint" data-i18n="hint.api_key_storage"></div>
+          </label>
+
+          <label class="field">
+            <span data-i18n="field.api_base_url"></span>
+            <input
+              id="apiBaseUrl"
+              type="text"
+              autocomplete="off"
+              spellcheck="false"
+              data-i18n-aria-label="field.api_base_url"
+              data-i18n-title="title.api_base_url"
+              data-i18n-placeholder="placeholder.api_base_url"
+            />
+            <div class="hint" data-i18n="hint.api_base_url"></div>
+          </label>
+
+          <label class="field">
+            <span data-i18n="field.mode"></span>
+            <select id="mode" data-i18n-aria-label="field.mode" data-i18n-title="title.mode">
+              <option value="sync" data-i18n="mode.sync"></option>
+              <option value="job" data-i18n="mode.job"></option>
+            </select>
+            <div class="hint" data-i18n="hint.mode"></div>
+          </label>
+        </div>
+
+        <div class="actions">
+          <button id="checkHealth" type="button" aria-describedby="healthStatus" data-i18n="action.check_health" data-i18n-aria-label="action.check_health"></button>
+          <span id="healthStatus" class="muted status" role="status" aria-live="polite" aria-atomic="true"></span>
+        </div>
+      </section>
+
+      <section class="card primary billingCard flowCard" id="dataCard">
+        <h2>
+          <span data-i18n="section.data"></span>
+        </h2>
+        <p class="sectionLead" data-i18n="section.data.lead"></p>
+        <div class="checklist" aria-live="polite">
+          <div class="checklistTitle" data-i18n="checklist.data.title"></div>
+          <div id="checkDataStatus" class="checklistStatus"></div>
+          <ul class="checklistList">
+            <li id="checkDataInput"></li>
+            <li id="checkDataRequired"></li>
+            <li id="checkDataValidate"></li>
+          </ul>
+        </div>
+
+        <div class="grid">
+          <div class="field">
+            <span data-i18n="field.data_source"></span>
+            <div id="dataSourcePicker" class="segmented" role="group" data-i18n-aria-label="field.data_source">
+              <button id="dataSourceBtnCsv" type="button" class="secondary" data-i18n="option.data_source.csv"></button>
+              <button id="dataSourceBtnJson" type="button" class="secondary" data-i18n="option.data_source.json"></button>
+              <button id="dataSourceBtnSample" type="button" class="secondary" data-i18n="option.data_source.sample"></button>
+            </div>
+            <select id="dataSource" hidden data-i18n-aria-label="field.data_source" data-i18n-title="title.data_source">
+              <option value="" data-i18n="option.data_source.none"></option>
+              <option value="csv" data-i18n="option.data_source.csv"></option>
+              <option value="json" data-i18n="option.data_source.json"></option>
+              <option value="sample" data-i18n="option.data_source.sample"></option>
+            </select>
+          </div>
+        </div>
+
+        <div id="dataSourceCsv" class="grid" hidden>
+          <label class="field">
+            <span data-i18n="field.csv"></span>
+            <div class="fileInput">
+              <input id="csvFile" type="file" accept=".csv,text/csv" data-i18n-aria-label="field.csv" data-i18n-title="title.csv_file" />
+              <label class="secondary fileButton" for="csvFile" data-i18n="field.csv_button"></label>
+              <span id="csvFileName" class="muted"></span>
+            </div>
+            <div class="hint" data-i18n="hint.timestamp_iso"></div>
+          </label>
+        </div>
+
+        <div id="dataSourceJson" class="grid" hidden>
+          <label class="field">
+            <span data-i18n="field.json"></span>
+            <textarea
+              id="jsonInput"
+              rows="8"
+              data-i18n-aria-label="field.json"
+              data-i18n-title="title.json_input"
+              data-i18n-placeholder="placeholder.json_example"
+            ></textarea>
+            <div class="hint" data-i18n="hint.json_array"></div>
+          </label>
+        </div>
+
+        <div class="actions" id="dataActionsSample" hidden>
+          <label class="samplePick">
+            <span data-i18n="field.sample_type"></span>
+            <select id="sampleType" data-i18n-aria-label="field.sample_type">
+              <option value="fd004_rul_forecast_unit01" data-i18n="option.sample.fd004_rul_forecast_unit01"></option>
+              <option value="fd004_rul_forecast_unit05" data-i18n="option.sample.fd004_rul_forecast_unit05"></option>
+              <option value="fd004_train_multiunit" data-i18n="option.sample.fd004_train_multiunit"></option>
+              <option value="fd004_backtest_multiunit" data-i18n="option.sample.fd004_backtest_multiunit"></option>
+              <option value="fd004_failure_watchlist" data-i18n="option.sample.fd004_failure_watchlist"></option>
+            </select>
+          </label>
+          <button id="loadSample" type="button" class="secondary" data-i18n="action.load_sample" data-i18n-aria-label="action.load_sample"></button>
+        </div>
+
+        <div class="actions" id="dataActionsConfirm" hidden>
+          <button id="validate" type="button" aria-describedby="dataStatus" data-i18n="action.validate" data-i18n-aria-label="action.validate"></button>
+          <button id="clear" type="button" class="secondary" data-i18n="action.clear" data-i18n-aria-label="action.clear"></button>
+          <span id="dataStatus" class="muted status" role="status" aria-live="polite" aria-atomic="true"></span>
+        </div>
+
+        <div id="dataPreview" class="analysis" hidden>
+          <div class="analysisTitle" data-i18n="data.preview.title"></div>
+          <div id="dataPreviewMeta" class="chipRow"></div>
+          <p id="dataPreviewExplain" class="analysisRow"></p>
+          <div class="tableWrap">
+            <table id="dataPreviewTable">
+              <thead></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+          <p class="muted" data-i18n="data.preview.note"></p>
+        </div>
+
+        <div id="dataAnalysis" class="analysis" hidden>
+          <div class="analysisTitle" data-i18n="analysis.title"></div>
+          <div id="analysisSummary" class="analysisRow"></div>
+          <div id="analysisFields" class="analysisRow"></div>
+          <div id="analysisTimestamps" class="analysisRow"></div>
+          <div id="analysisGaps" class="analysisRow"></div>
+          <div id="analysisGapsSample" class="analysisRow"></div>
+          <div id="gapsAcknowledge" class="analysisRow" hidden>
+            <label class="checkboxRow gapsAck">
+              <input id="ackGaps" type="checkbox" />
+              <span data-i18n="analysis.gaps_ack"></span>
+            </label>
+          </div>
+
+          <div id="analysisExplore" class="analysisRow">
+            <div class="analysisSubtitle" data-i18n="analysis.explore.title"></div>
+            <div class="analysisExploreControls">
+              <label class="resultsChartPick">
+                <span data-i18n="analysis.explore.dataset"></span>
+                <select id="exploreDataset" data-i18n-aria-label="analysis.explore.dataset">
+                  <option value="input" data-i18n="analysis.explore.dataset.input"></option>
+                  <option value="forecast" data-i18n="analysis.explore.dataset.forecast"></option>
+                  <option value="residual" data-i18n="analysis.explore.dataset.residual"></option>
+                </select>
+              </label>
+              <label class="resultsChartPick">
+                <span data-i18n="analysis.explore.template"></span>
+                <select id="exploreTemplate" data-i18n-aria-label="analysis.explore.template">
+                  <option value="manual" data-i18n="analysis.explore.template.manual"></option>
+                  <option value="cv_overview" data-i18n="analysis.explore.template.cv_overview"></option>
+                  <option value="segment_share" data-i18n="analysis.explore.template.segment_share"></option>
+                  <option value="driver_scatter" data-i18n="analysis.explore.template.driver_scatter"></option>
+                </select>
+              </label>
+              <label class="resultsChartPick">
+                <span data-i18n="analysis.explore.type"></span>
+                <select id="exploreChartType" data-i18n-aria-label="analysis.explore.type">
+                  <option value="hist" data-i18n="analysis.explore.chart.hist"></option>
+                  <option value="category" data-i18n="analysis.explore.chart.category"></option>
+                  <option value="scatter" data-i18n="analysis.explore.chart.scatter"></option>
+                </select>
+              </label>
+              <label class="resultsChartPick">
+                <span data-i18n="analysis.explore.x"></span>
+                <select id="exploreFieldX" data-i18n-aria-label="analysis.explore.x"></select>
+              </label>
+              <label class="resultsChartPick">
+                <span data-i18n="analysis.explore.y"></span>
+                <select id="exploreFieldY" data-i18n-aria-label="analysis.explore.y"></select>
+              </label>
+            </div>
+            <div id="exploreStatus" class="muted status" role="status" aria-live="polite" aria-atomic="true"></div>
+            <svg id="exploreChart" viewBox="0 0 640 220" preserveAspectRatio="none" aria-label="Explore chart" data-i18n-aria-label="analysis.explore.title"></svg>
+            <div class="tableWrap">
+              <table id="exploreSummaryTable">
+                <thead></thead>
+                <tbody></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        
+      </section>
+
+      <section class="card primary billingCard flowCard" id="paramsCard">
+        <h2>
+          <span data-i18n="section.params"></span>
+        </h2>
+        <p class="sectionLead" data-i18n="section.params.lead"></p>
+        <div class="checklist" aria-live="polite">
+          <div class="checklistTitle" data-i18n="checklist.params.title"></div>
+          <div id="checkParamsStatus" class="checklistStatus"></div>
+          <ul class="checklistList">
+            <li id="checkParamsHorizon"></li>
+            <li id="checkParamsQuantiles"></li>
+          </ul>
+        </div>
+        <div class="paramsLinkRow">
+          <div id="paramsLinkNote" class="muted status" role="status" aria-live="polite" aria-atomic="true"></div>
+          <button id="paramsSync" type="button" class="secondary" data-i18n="params.link.sync_cta"></button>
+        </div>
+        <div class="grid">
+          <label class="field">
+            <span data-i18n="field.task"></span>
+            <select id="task" data-i18n-aria-label="field.task" data-i18n-title="title.task">
+              <option value="forecast" data-i18n="option.task.forecast"></option>
+              <option value="train" data-i18n="option.task.train"></option>
+              <option value="backtest" data-i18n="option.task.backtest"></option>
+              <option value="drift" data-i18n="option.task.drift"></option>
+            </select>
+            <div class="hint" data-i18n="hint.task"></div>
+          </label>
+
+          <div id="driftBaselinePanel" class="embeddedSection" hidden>
+            <div class="analysisTitle" data-i18n="params.drift_baseline.title"></div>
+            <p class="muted" data-i18n="params.drift_baseline.note"></p>
+            <div class="actions">
+              <button
+                id="saveDriftBaseline"
+                type="button"
+                class="secondary"
+                data-i18n="action.save_drift_baseline"
+                data-i18n-aria-label="action.save_drift_baseline"
+              ></button>
+              <button
+                id="refreshDriftBaseline"
+                type="button"
+                class="secondary"
+                data-i18n="action.refresh_drift_baseline"
+                data-i18n-aria-label="action.refresh_drift_baseline"
+              ></button>
+              <span id="driftBaselineStatus" class="muted status" role="status" aria-live="polite" aria-atomic="true"></span>
+            </div>
+          </div>
+
+          <div id="horizonField">
+            <label class="field required">
+              <span data-i18n="field.horizon"></span>
+              <span class="badge required" data-i18n="badge.required"></span>
+              <input id="horizon" type="number" min="1" value="2" data-i18n-aria-label="field.horizon" />
+              <div class="hint" data-i18n="hint.horizon"></div>
+            </label>
+          </div>
+
+          <div id="forecastParams">
+            <label class="field">
+              <span data-i18n="field.frequency"></span>
+              <span class="badge recommended" data-i18n="badge.recommended"></span>
+              <input id="frequency" type="text" data-i18n-aria-label="field.frequency" data-i18n-placeholder="placeholder.frequency" />
+              <div class="hint" data-i18n="hint.frequency"></div>
+            </label>
+
+            <label class="field">
+              <span data-i18n="field.missing_policy"></span>
+              <select id="missingPolicy" data-i18n-aria-label="field.missing_policy" data-i18n-title="title.missing_policy">
+                <option value="ignore" data-i18n="option.missing_policy.ignore"></option>
+                <option value="error" data-i18n="option.missing_policy.error"></option>
+              </select>
+              <div class="hint" data-i18n="hint.missing_policy"></div>
+            </label>
+
+            <label class="field">
+              <span data-i18n="field.uncertainty_mode"></span>
+              <select id="uncertaintyMode" data-i18n-aria-label="field.uncertainty_mode" data-i18n-title="title.uncertainty_mode">
+                <option value="quantiles" data-i18n="option.uncertainty_mode.quantiles"></option>
+                <option value="level" data-i18n="option.uncertainty_mode.level"></option>
+              </select>
+              <div class="hint" data-i18n="hint.uncertainty_mode"></div>
+            </label>
+
+            <label class="field" id="quantilesField">
+              <span data-i18n="field.quantiles"></span>
+              <input id="quantiles" type="text" data-i18n-aria-label="field.quantiles" data-i18n-placeholder="placeholder.quantiles" />
+              <div class="hint" data-i18n="hint.quantiles"></div>
+            </label>
+
+            <label class="field" id="levelField">
+              <span data-i18n="field.level"></span>
+              <input id="level" type="text" data-i18n-aria-label="field.level" data-i18n-placeholder="placeholder.level" />
+              <div class="hint" data-i18n="hint.level"></div>
+            </label>
+
+            <label class="field">
+              <span data-i18n="field.value_unit"></span>
+              <input id="valueUnit" type="text" data-i18n-aria-label="field.value_unit" data-i18n-placeholder="placeholder.value_unit" />
+              <div class="hint" data-i18n="hint.value_unit"></div>
+            </label>
+
+            <label class="field">
+              <span data-i18n="field.model_id"></span>
+              <input
+                id="modelId"
+                type="text"
+                autocomplete="off"
+                data-i18n-aria-label="field.model_id"
+                data-i18n-title="title.model_id"
+                data-i18n-placeholder="placeholder.model_id"
+              />
+              <div class="hint" data-i18n="hint.model_id"></div>
+            </label>
+          </div>
+
+          <div id="backtestParams" hidden>
+            <label class="field">
+              <span data-i18n="field.folds"></span>
+              <input id="folds" type="number" min="1" max="20" step="1" value="5" data-i18n-aria-label="field.folds" />
+            </label>
+
+            <label class="field">
+              <span data-i18n="field.metric"></span>
+              <select id="metric" data-i18n-aria-label="field.metric">
+                <option value="rmse" data-i18n="option.metric.rmse"></option>
+                <option value="mae" data-i18n="option.metric.mae"></option>
+                <option value="mape" data-i18n="option.metric.mape"></option>
+                <option value="smape" data-i18n="option.metric.smape"></option>
+                <option value="mase" data-i18n="option.metric.mase"></option>
+                <option value="wape" data-i18n="option.metric.wape"></option>
+              </select>
+            </label>
+          </div>
+
+          <div id="trainParams" hidden>
+            <label class="field">
+              <span data-i18n="field.train_algo"></span>
+              <select id="trainAlgo" data-i18n-aria-label="field.train_algo" data-i18n-title="title.train_algo">
+                <option value="" data-i18n="option.train_algo.auto"></option>
+                <option value="ridge_lags_v1" data-i18n="option.train_algo.ridge_lags_v1"></option>
+                <option value="afnocg2" data-i18n="option.train_algo.afnocg2"></option>
+                <option value="afnocg3_v1" data-i18n="option.train_algo.afnocg3_v1"></option>
+                <option value="naive" data-i18n="option.train_algo.naive"></option>
+              </select>
+              <div class="hint" data-i18n="hint.train_algo"></div>
+            </label>
+
+            <label class="field">
+              <span data-i18n="field.base_model"></span>
+              <input id="baseModel" type="text" data-i18n-aria-label="field.base_model" data-i18n-placeholder="placeholder.base_model" autocomplete="off" />
+            </label>
+
+            <label class="field">
+              <span data-i18n="field.model_name"></span>
+              <input id="modelName" type="text" data-i18n-aria-label="field.model_name" data-i18n-placeholder="placeholder.model_name" autocomplete="off" />
+            </label>
+
+            <label class="field">
+              <span data-i18n="field.training_hours"></span>
+              <input id="trainingHours" type="number" min="0.05" step="0.05" data-i18n-aria-label="field.training_hours" data-i18n-placeholder="placeholder.training_hours" />
+            </label>
+          </div>
+        </div>
+
+        <div class="actions primary-actions">
+          <button id="runForecast" type="button" class="primary" aria-describedby="runStatus" data-i18n="common.run" data-i18n-aria-label="common.run"></button>
+          <button id="cancelRun" type="button" class="secondary" aria-describedby="runStatus" disabled data-i18n="common.cancel" data-i18n-aria-label="common.cancel"></button>
+          <span id="runStatus" class="muted status" role="status" aria-live="polite" aria-atomic="true"></span>
+          <span class="muted" data-i18n="params.run_hint"></span>
+        </div>
+
+        <div id="warnBox" class="warn" role="status" aria-live="polite" aria-atomic="true" hidden></div>
+
+        <div class="embeddedSection" id="modelsCard" data-density="advanced">
+          <h3 data-i18n="nav.models"></h3>
+          <p class="muted" data-i18n="models.embedded_note"></p>
+          <p class="muted" data-i18n="models.lead"></p>
+
+          <div class="actions">
+            <span class="muted" data-i18n="models.default_title"></span>
+            <span id="defaultModelValue" class="muted" role="status" aria-live="polite" aria-atomic="true"></span>
+            <button
+              id="rollbackDefaultModel"
+              type="button"
+              class="secondary"
+              aria-describedby="defaultModelValue"
+              data-i18n="models.action.rollback"
+              data-i18n-aria-label="models.action.rollback"
+            ></button>
+          </div>
+
+          <div class="analysisTitle" data-i18n="models.trained_title"></div>
+          <div class="actions">
+            <button id="syncModels" type="button" class="secondary" data-i18n="models.action.sync" data-i18n-aria-label="models.action.sync"></button>
+            <span id="modelsStatus" class="muted status" role="status" aria-live="polite" aria-atomic="true"></span>
+          </div>
+
+          <p id="modelsEmpty" class="muted" data-i18n="models.empty" hidden></p>
+
+          <div class="tableWrap" aria-describedby="modelsStatus">
+            <table id="modelsTable">
+              <thead>
+                <tr>
+                  <th data-i18n="models.table.model_id"></th>
+                  <th data-i18n="models.table.created_at"></th>
+                  <th data-i18n="models.table.memo"></th>
+                  <th data-i18n="models.table.actions"></th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <section class="card primary billingCard resultsCard flowCard" id="resultsCard" aria-busy="false">
+        <h2>
+          <span data-i18n="section.results"></span>
+        </h2>
+        <p class="sectionLead" data-i18n="section.results.lead"></p>
+        <div
+          id="resultsProgress"
+          class="resultsProgress"
+          role="progressbar"
+          aria-label="Results progress"
+          data-i18n-aria-label="results.progress_aria"
+          aria-valuemin="0"
+          aria-valuemax="100"
+        >
+          <div id="resultsProgressFill" class="resultsProgressFill" aria-hidden="true"></div>
+        </div>
+        <div id="resultsProgressText" class="resultsProgressText muted"></div>
+        <div id="errorBox" class="error" role="alert" aria-live="assertive" aria-atomic="true" hidden></div>
+        <div id="errorActions" class="actions" hidden>
+          <button id="copyError" type="button" class="secondary" aria-describedby="errorBox" data-i18n="action.copy_error" data-i18n-aria-label="action.copy_error"></button>
+          <a href="#helpCard" class="muted" data-i18n="help.link_label" data-i18n-aria-label="help.link_label"></a>
+          <span id="copyStatus" class="muted status" role="status" aria-live="polite" aria-atomic="true"></span>
+        </div>
+
+        <div id="resultsVisual" class="resultsMain" hidden>
+          <div class="analysisTitle" data-i18n="results.visual.title"></div>
+          <div id="resultsVisualNote" class="muted" data-i18n="results.visual.note"></div>
+          <div class="muted" data-i18n="results.visual.grid_note"></div>
+          <label class="resultsChartPick">
+            <span data-i18n="results.chart_type"></span>
+            <select id="resultsChartType" data-i18n-aria-label="results.chart_type">
+              <option value="trend" data-i18n="results.chart.trend"></option>
+              <option value="points" data-i18n="results.chart.points"></option>
+              <option value="bars" data-i18n="results.chart.bars"></option>
+              <option value="band" data-i18n="results.chart.band"></option>
+              <option value="area" data-i18n="results.chart.area"></option>
+              <option value="step" data-i18n="results.chart.step"></option>
+              <option value="cumulative" data-i18n="results.chart.cumulative"></option>
+              <option value="change" data-i18n="results.chart.change"></option>
+              <option value="index" data-i18n="results.chart.index"></option>
+            </select>
+          </label>
+          <label class="resultsChartPick">
+            <span data-i18n="results.series"></span>
+            <select id="resultsSeries" data-i18n-aria-label="results.series"></select>
+          </label>
+
+          <div class="resultsChartGrid">
+            <div class="resultsChartBlock">
+              <div id="resultsPrimaryChartTitle" class="muted"></div>
+              <div class="resultsChartFrame">
+                <div id="resultsAxisValue" class="resultsAxisLabel resultsAxisLabelY" data-i18n="results.axis.value"></div>
+                <div id="resultsAxisTime" class="resultsAxisLabel resultsAxisLabelX" data-i18n="results.axis.time"></div>
+                <div id="resultsAxisYMax" class="resultsAxisTick resultsAxisTickYMax"></div>
+                <div id="resultsAxisYMin" class="resultsAxisTick resultsAxisTickYMin"></div>
+                <div id="resultsAxisXMin" class="resultsAxisTick resultsAxisTickXMin"></div>
+                <div id="resultsAxisXMax" class="resultsAxisTick resultsAxisTickXMax"></div>
+                <svg id="resultsSparkline" viewBox="0 0 640 240" preserveAspectRatio="none"></svg>
+              </div>
+            </div>
+
+            <div id="resultsSecondaryChartBlock" class="resultsChartBlock" hidden>
+              <div id="resultsSecondaryChartTitle" class="muted"></div>
+              <div class="resultsChartFrame">
+                <div id="resultsAxisValue2" class="resultsAxisLabel resultsAxisLabelY" data-i18n="results.axis.value"></div>
+                <div id="resultsAxisTime2" class="resultsAxisLabel resultsAxisLabelX" data-i18n="results.axis.time"></div>
+                <div id="resultsAxisYMax2" class="resultsAxisTick resultsAxisTickYMax"></div>
+                <div id="resultsAxisYMin2" class="resultsAxisTick resultsAxisTickYMin"></div>
+                <div id="resultsAxisXMin2" class="resultsAxisTick resultsAxisTickXMin"></div>
+                <div id="resultsAxisXMax2" class="resultsAxisTick resultsAxisTickXMax"></div>
+                <svg id="resultsSparklineSecondary" viewBox="0 0 640 240" preserveAspectRatio="none"></svg>
+              </div>
+            </div>
+
+            <div id="resultsTertiaryChartBlock" class="resultsChartBlock" hidden>
+              <div id="resultsTertiaryChartTitle" class="muted"></div>
+              <div class="resultsChartFrame">
+                <div id="resultsAxisValue3" class="resultsAxisLabel resultsAxisLabelY" data-i18n="results.axis.value"></div>
+                <div id="resultsAxisTime3" class="resultsAxisLabel resultsAxisLabelX" data-i18n="results.axis.time"></div>
+                <div id="resultsAxisYMax3" class="resultsAxisTick resultsAxisTickYMax"></div>
+                <div id="resultsAxisYMin3" class="resultsAxisTick resultsAxisTickYMin"></div>
+                <div id="resultsAxisXMin3" class="resultsAxisTick resultsAxisTickXMin"></div>
+                <div id="resultsAxisXMax3" class="resultsAxisTick resultsAxisTickXMax"></div>
+                <svg id="resultsSparklineTertiary" viewBox="0 0 640 240" preserveAspectRatio="none"></svg>
+              </div>
+            </div>
+          </div>
+
+          <div id="resultsHighlights" class="resultsHighlights" hidden>
+            <div id="resultsHighlightSeries" class="resultsHighlight"></div>
+            <div id="resultsHighlightPoints" class="resultsHighlight"></div>
+            <div id="resultsHighlightBand" class="resultsHighlight"></div>
+          </div>
+        </div>
+        <div id="resultsLegend" class="legend" hidden>
+          <div class="legendTitle" data-i18n="results.legend.title"></div>
+          <div class="legendItem" data-i18n="results.legend.point"></div>
+          <div class="legendItem" data-i18n="results.legend.quantiles"></div>
+          <div class="legendItem" data-i18n="results.legend.intervals"></div>
+        </div>
+
+        <div class="resultsActionsHeader">
+          <div class="resultsActionsTitle" data-i18n="results.actions.title"></div>
+        </div>
+        <div class="actions results-actions">
+          <div class="resultsPrimaryActions">
+            <button id="downloadJson" type="button" class="secondary" disabled data-i18n="common.download_json" data-i18n-aria-label="common.download_json"></button>
+            <button id="downloadCsv" type="button" class="secondary" disabled data-i18n="common.download_csv" data-i18n-aria-label="common.download_csv"></button>
+          </div>
+          <div class="resultsSecondaryActions">
+            <button id="copyLink" type="button" class="secondary" aria-describedby="shareStatus" data-i18n="common.copy_link" data-i18n-aria-label="common.copy_link"></button>
+            <button id="copySnippet" type="button" class="secondary" aria-describedby="shareStatus" data-i18n="common.copy_snippet" data-i18n-aria-label="common.copy_snippet"></button>
+            <span id="shareStatus" class="muted status" role="status" aria-live="polite" aria-atomic="true"></span>
+          </div>
+        </div>
+        <div id="requestIdWrap" class="actions resultsMeta" hidden>
+          <span id="requestId" class="muted" data-i18n="results.request_id"></span>
+          <button id="copyRequestId" type="button" class="secondary" aria-describedby="requestId" data-i18n="action.copy_request_id" data-i18n-aria-label="action.copy_request_id"></button>
+          <span class="muted" data-i18n="results.request_id_note"></span>
+        </div>
+        <p id="resultsEmpty" class="muted resultsMeta" data-i18n="results.empty" hidden></p>
+        <p id="resultsTrainNote" class="muted resultsMeta" data-i18n="results.train_note" hidden></p>
+        <div id="resultsSummary" class="resultsSummary" hidden>
+          <div class="analysisTitle" data-i18n="results.summary.title"></div>
+          <div id="resultsSummaryChips" class="chipRow"></div>
+          <div id="resultsSummaryNote" class="muted"></div>
+        </div>
+        <div id="resultsEvidence" class="analysis" hidden>
+          <div class="analysisTitle" data-i18n="results.evidence.title"></div>
+          <div id="resultsEvidenceQuality" class="analysisRow"></div>
+          <div id="resultsEvidenceUncertainty" class="analysisRow"></div>
+          <div id="resultsEvidenceScope" class="analysisRow"></div>
+          <div id="resultsEvidenceLimit" class="analysisRow"></div>
+        </div>
+        <div id="resultsBenchmark" class="analysis" hidden>
+          <div class="analysisTitle" data-i18n="results.benchmark.title"></div>
+          <div id="resultsBenchmarkSummary" class="analysisRow"></div>
+          <div id="resultsBenchmarkNote" class="analysisRow"></div>
+          <div class="tableWrap">
+            <table id="resultsBenchmarkTable">
+              <thead>
+                <tr>
+                  <th data-i18n="results.benchmark.table.rank"></th>
+                  <th data-i18n="results.benchmark.table.model"></th>
+                  <th data-i18n="results.benchmark.table.rmse"></th>
+                  <th data-i18n="results.benchmark.table.mae"></th>
+                  <th data-i18n="results.benchmark.table.source"></th>
+                  <th data-i18n="results.benchmark.table.scope"></th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+        <div id="resultsInterpretation" class="analysis" hidden>
+          <div class="analysisTitle" data-i18n="results.interpret.title"></div>
+          <div id="resultsInterpretIntent" class="analysisRow"></div>
+          <div id="resultsInterpretWhen" class="analysisRow"></div>
+          <div id="resultsInterpretCaution" class="analysisRow"></div>
+        </div>
+        <details id="metricsWrap" class="resultsMain resultsDetails" hidden>
+          <summary data-i18n="backtest.metrics_title"></summary>
+          <p class="muted" data-i18n="backtest.metrics_note"></p>
+          <p id="metricsPrimary" class="muted" data-i18n="backtest.metrics_primary"></p>
+          <div class="tableWrap">
+            <table id="metricsTable">
+              <thead>
+                <tr>
+                  <th data-i18n="backtest.table.metric"></th>
+                  <th data-i18n="backtest.table.value"></th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </details>
+
+        <details id="bySeriesWrap" class="resultsMain resultsDetails" hidden>
+          <summary data-i18n="backtest.by_series_title"></summary>
+          <p class="muted" data-i18n="backtest.by_series_note"></p>
+          <div class="tableWrap">
+            <table id="bySeriesTable">
+              <thead>
+                <tr>
+                  <th data-i18n="backtest.table.rank"></th>
+                  <th data-i18n="backtest.table.series_id"></th>
+                  <th data-i18n="backtest.table.value"></th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </details>
+
+        <details id="byHorizonWrap" class="resultsMain resultsDetails" hidden>
+          <summary data-i18n="backtest.by_horizon_title"></summary>
+          <p class="muted" data-i18n="backtest.by_horizon_note"></p>
+          <div class="tableWrap">
+            <table id="byHorizonTable">
+              <thead>
+                <tr>
+                  <th data-i18n="backtest.table.horizon"></th>
+                  <th data-i18n="backtest.table.value"></th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </details>
+
+        <details id="byFoldWrap" class="resultsMain resultsDetails" hidden>
+          <summary data-i18n="backtest.by_fold_title"></summary>
+          <p class="muted" data-i18n="backtest.by_fold_note"></p>
+          <div class="tableWrap">
+            <table id="byFoldTable">
+              <thead>
+                <tr>
+                  <th data-i18n="backtest.table.fold"></th>
+                  <th data-i18n="backtest.table.value"></th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </details>
+
+        <details id="driftFeaturesWrap" class="resultsMain resultsDetails" hidden>
+          <summary data-i18n="results.details.drift_features"></summary>
+          <p class="muted" data-i18n="results.details.drift_features_note"></p>
+          <div class="tableWrap">
+            <table id="driftFeaturesTable">
+              <thead>
+                <tr>
+                  <th data-i18n="results.drift_table.feature"></th>
+                  <th data-i18n="results.drift_table.psi"></th>
+                  <th data-i18n="results.drift_table.requested_bins"></th>
+                  <th data-i18n="results.drift_table.selected_bins"></th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </details>
+
+        <p id="resultsTableNote" class="muted" data-i18n="results.table_note" hidden></p>
+        <details id="forecastTableWrap" class="tableWrap resultsMain resultsDetails" hidden>
+          <summary data-i18n="results.details.forecast_table"></summary>
+          <table id="resultTable">
+            <thead>
+              <tr>
+                <th data-i18n="table.series_id" data-i18n-title="title.table.series_id"></th>
+                <th data-i18n="table.timestamp" data-i18n-title="title.table.timestamp"></th>
+                <th data-i18n="table.point" data-i18n-title="title.table.point"></th>
+                <th data-i18n="table.quantiles" data-i18n-title="title.table.quantiles"></th>
+                <th data-i18n="table.intervals" data-i18n-title="title.table.intervals"></th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </details>
+        <details id="resultsGuide" class="analysis resultsDetails" hidden>
+          <summary data-i18n="results.guide.title"></summary>
+          <div class="analysisRow" data-i18n="results.guide.point"></div>
+          <div class="analysisRow" data-i18n="results.guide.quantiles"></div>
+          <div class="analysisRow" data-i18n="results.guide.intervals"></div>
+        </details>
+        <details id="rawDetails" class="rawDetails" data-density="advanced" hidden>
+          <summary data-i18n="results.raw_title"></summary>
+          <pre id="rawJson" class="raw"></pre>
+        </details>
+
+        <div class="embeddedSection" id="jobsCard" data-density="advanced">
+          <h3 data-i18n="nav.jobs"></h3>
+          <p class="muted" data-i18n="jobs.embedded_note"></p>
+          <p class="muted" data-i18n="jobs.guide"></p>
+
+          <div class="grid">
+            <label class="field">
+              <span data-i18n="field.job_id"></span>
+              <input
+                id="jobIdInput"
+                type="text"
+                autocomplete="off"
+                data-i18n-aria-label="field.job_id"
+                data-i18n-placeholder="placeholder.job_id"
+              />
+              <div class="hint" data-i18n="hint.job_id"></div>
+            </label>
+          </div>
+
+          <div class="actions">
+            <button id="addJobId" type="button" class="secondary" aria-describedby="jobsStatus" data-i18n="action.add_job_id" data-i18n-aria-label="action.add_job_id"></button>
+            <button id="refreshJobs" type="button" class="secondary" aria-describedby="jobsStatus" data-i18n="action.refresh_jobs" data-i18n-aria-label="action.refresh_jobs"></button>
+            <span id="jobsStatus" class="muted status" role="status" aria-live="polite" aria-atomic="true"></span>
+          </div>
+
+          <p id="jobsEmpty" class="muted" data-i18n="jobs.empty" hidden></p>
+
+          <div class="tableWrap" aria-describedby="jobsStatus">
+            <table id="jobsTable">
+              <thead>
+                <tr>
+                  <th data-i18n="jobs.table.job_id"></th>
+                  <th data-i18n="jobs.table.status"></th>
+                  <th data-i18n="jobs.table.progress"></th>
+                  <th data-i18n="jobs.table.updated"></th>
+                  <th data-i18n="jobs.table.actions"></th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <div class="sectionDivider" data-density="advanced">
+        <div class="sectionDividerTitle" data-i18n="section.support.title"></div>
+        <div class="sectionDividerNote" data-i18n="section.support.note"></div>
+      </div>
+
+      <section class="card tone-c referenceCard billingCard" id="billingCard" data-density="advanced">
+        <h2>
+          <span data-i18n="nav.billing"></span>
+        </h2>
+        <div class="billingMetrics">
+          <div class="billingMetric">
+            <div class="billingMetricLabel" data-i18n="billing.metric.remaining"></div>
+            <div id="billingMetricRemaining" class="billingMetricValue"></div>
+          </div>
+          <div class="billingMetric">
+            <div class="billingMetricLabel" data-i18n="billing.metric.used"></div>
+            <div id="billingMetricUsed" class="billingMetricValue"></div>
+          </div>
+          <div class="billingMetric">
+            <div class="billingMetricLabel" data-i18n="billing.metric.limit"></div>
+            <div id="billingMetricLimit" class="billingMetricValue"></div>
+          </div>
+        </div>
+        <p class="muted" data-i18n="billing.lead"></p>
+
+        <div class="billingDetail">
+          <div class="billingDetailTitle" data-i18n="billing.detail_title"></div>
+          <div class="billingDetailChart" aria-hidden="true">
+            <div class="billingDetailTrack">
+              <div id="billingDetailUsedBar" class="billingDetailBar billingDetailBarUsed"></div>
+              <div id="billingDetailRemainingBar" class="billingDetailBar billingDetailBarRemaining"></div>
+            </div>
+            <div class="billingDetailLegend">
+              <span class="billingDetailLegendItem">
+                <span class="billingDetailSwatch billingDetailSwatchUsed"></span>
+                <span data-i18n="billing.chart.used"></span>
+              </span>
+              <span class="billingDetailLegendItem">
+                <span class="billingDetailSwatch billingDetailSwatchRemaining"></span>
+                <span data-i18n="billing.chart.remaining"></span>
+              </span>
+            </div>
+          </div>
+          <div class="billingDetailImpact">
+            <div class="billingImpactRow">
+              <div class="billingImpactLabel" data-i18n="billing.chart.unit_series"></div>
+              <div class="billingImpactBar">
+                <div id="billingImpactSeriesBar" class="billingImpactFill"></div>
+              </div>
+              <div id="billingImpactSeriesValue" class="billingImpactValue"></div>
+            </div>
+            <div class="billingImpactRow">
+              <div class="billingImpactLabel" data-i18n="billing.chart.unit_horizon"></div>
+              <div class="billingImpactBar">
+                <div id="billingImpactHorizonBar" class="billingImpactFill"></div>
+              </div>
+              <div id="billingImpactHorizonValue" class="billingImpactValue"></div>
+            </div>
+          </div>
+          <div id="billingDetailBody" class="muted"></div>
+        </div>
+
+        <div id="billingWarn" class="warn" role="status" aria-live="polite" aria-atomic="true" hidden></div>
+        <div id="billingError" class="error" role="alert" aria-live="assertive" aria-atomic="true" hidden></div>
+      </section>
+
+      <section class="card tone-a referenceCard helpCard" id="helpCard" aria-label="Help" data-i18n-aria-label="aria.help_section">
+        <h2 data-i18n="section.help"></h2>
+        <p class="sectionLead" data-i18n="section.help.lead"></p>
+        <p class="muted" data-i18n="help.lead"></p>
+        <div class="helpMap" aria-label="Workflow map" data-density="advanced">
+          <div class="helpMapNode" data-i18n="help.map.connection"></div>
+          <div class="helpMapArrow" aria-hidden="true"></div>
+          <div class="helpMapNode" data-i18n="help.map.data"></div>
+          <div class="helpMapArrow" aria-hidden="true"></div>
+          <div class="helpMapNode" data-i18n="help.map.params"></div>
+          <div class="helpMapArrow" aria-hidden="true"></div>
+          <div class="helpMapNode" data-i18n="help.map.results"></div>
+        </div>
+        <div class="helpConcierge">
+          <div class="helpConciergeTitle" data-i18n="help.concierge.title"></div>
+          <div class="helpConciergeBody" data-i18n="help.concierge.body"></div>
+          <label class="field">
+            <span data-i18n="help.concierge.ask_label"></span>
+            <div class="inputRow">
+              <input id="helpAsk" type="text" data-i18n-aria-label="help.concierge.ask_label" data-i18n-placeholder="help.concierge.ask_placeholder" />
+              <button id="helpAskBtn" type="button" class="secondary" data-i18n="help.concierge.ask_cta"></button>
+            </div>
+            <div class="hint" data-i18n="help.concierge.ask_note"></div>
+          </label>
+          <label class="field">
+            <span data-i18n="help.concierge.label"></span>
+            <div class="inputRow">
+              <select id="helpTopic" data-i18n-aria-label="help.concierge.label">
+                <option value="data" data-i18n="help.concierge.option.data"></option>
+                <option value="run" data-i18n="help.concierge.option.run"></option>
+                <option value="quota" data-i18n="help.concierge.option.quota"></option>
+                <option value="results" data-i18n="help.concierge.option.results"></option>
+                <option value="support" data-i18n="help.concierge.option.support"></option>
+              </select>
+              <button id="helpGuide" type="button" class="secondary" data-i18n="help.concierge.cta"></button>
+            </div>
+          </label>
+          <div id="helpAdvice" class="helpConciergeAdvice" aria-live="polite"></div>
+          <div class="helpConciergeActions">
+            <button id="helpActionSample" type="button" class="secondary" data-i18n="help.concierge.action.sample"></button>
+            <button id="helpActionValidate" type="button" class="secondary" data-i18n="help.concierge.action.validate"></button>
+            <button id="helpActionRun" type="button" class="secondary" data-i18n="help.concierge.action.run"></button>
+            <button id="helpActionSupport" type="button" class="secondary" data-i18n="help.concierge.action.support"></button>
+          </div>
+        </div>
+        <div class="helpFlowGrid" data-density="advanced">
+          <div class="helpPanel helpPanelPrimary">
+            <div class="helpPanelTitle" data-i18n="help.flow.input.title"></div>
+            <ol class="helpFlow">
+              <li class="helpFlowItem">
+                <span class="helpFlowBadge">1</span>
+                <div>
+                  <div class="helpFlowTitle" data-i18n="help.flow.input.step1.title"></div>
+                  <div class="helpFlowBody" data-i18n="help.flow.input.step1.body"></div>
+                </div>
+              </li>
+              <li class="helpFlowItem">
+                <span class="helpFlowBadge">2</span>
+                <div>
+                  <div class="helpFlowTitle" data-i18n="help.flow.input.step2.title"></div>
+                  <div class="helpFlowBody" data-i18n="help.flow.input.step2.body"></div>
+                </div>
+              </li>
+              <li class="helpFlowItem">
+                <span class="helpFlowBadge">3</span>
+                <div>
+                  <div class="helpFlowTitle" data-i18n="help.flow.input.step3.title"></div>
+                  <div class="helpFlowBody" data-i18n="help.flow.input.step3.body"></div>
+                </div>
+              </li>
+            </ol>
+          </div>
+          <div class="helpPanel helpPanelPrimary">
+            <div class="helpPanelTitle" data-i18n="help.flow.support.title"></div>
+            <ol class="helpFlow">
+              <li class="helpFlowItem">
+                <span class="helpFlowBadge">1</span>
+                <div>
+                  <div class="helpFlowTitle" data-i18n="help.flow.support.step1.title"></div>
+                  <div class="helpFlowBody" data-i18n="help.flow.support.step1.body"></div>
+                </div>
+              </li>
+              <li class="helpFlowItem">
+                <span class="helpFlowBadge">2</span>
+                <div>
+                  <div class="helpFlowTitle" data-i18n="help.flow.support.step2.title"></div>
+                  <div class="helpFlowBody" data-i18n="help.flow.support.step2.body"></div>
+                </div>
+              </li>
+              <li class="helpFlowItem">
+                <span class="helpFlowBadge">3</span>
+                <div>
+                  <div class="helpFlowTitle" data-i18n="help.flow.support.step3.title"></div>
+                  <div class="helpFlowBody" data-i18n="help.flow.support.step3.body"></div>
+                </div>
+              </li>
+            </ol>
+          </div>
+          <div class="helpPanel helpPanelPrimary">
+            <div class="helpPanelTitle" data-i18n="help.flow.dev.title"></div>
+            <ol class="helpFlow">
+              <li class="helpFlowItem">
+                <span class="helpFlowBadge">1</span>
+                <div>
+                  <div class="helpFlowTitle" data-i18n="help.flow.dev.step1.title"></div>
+                  <div class="helpFlowBody" data-i18n="help.flow.dev.step1.body"></div>
+                </div>
+              </li>
+              <li class="helpFlowItem">
+                <span class="helpFlowBadge">2</span>
+                <div>
+                  <div class="helpFlowTitle" data-i18n="help.flow.dev.step2.title"></div>
+                  <div class="helpFlowBody" data-i18n="help.flow.dev.step2.body"></div>
+                </div>
+              </li>
+              <li class="helpFlowItem">
+                <span class="helpFlowBadge">3</span>
+                <div>
+                  <div class="helpFlowTitle" data-i18n="help.flow.dev.step3.title"></div>
+                  <div class="helpFlowBody" data-i18n="help.flow.dev.step3.body"></div>
+                </div>
+              </li>
+            </ol>
+          </div>
+        </div>
+        <div class="helpGrid" data-density="advanced">
+          <div class="helpPanel">
+            <div class="helpPanelTitle" data-i18n="help.panel.data_link_title"></div>
+            <div class="helpPanelBody" data-i18n="help.panel.data_link_body"></div>
+            <div class="helpMiniGrid helpMiniGridTight">
+              <div class="helpMiniCard">
+                <div class="helpMiniDiagram helpMiniDiagramFlow">
+                  <span class="helpMiniNode"></span>
+                  <span class="helpMiniNode helpMiniNode2"></span>
+                  <span class="helpMiniNode helpMiniNode3"></span>
+                  <span class="helpMiniFlow"></span>
+                </div>
+                <div class="helpMiniLabel" data-i18n="help.data_link.mini.sync"></div>
+              </div>
+              <div class="helpMiniCard">
+                <div class="helpMiniDiagram helpMiniDiagramFlow">
+                  <span class="helpMiniNode helpMiniNodeAlert"></span>
+                  <span class="helpMiniNode helpMiniNode2"></span>
+                  <span class="helpMiniNode helpMiniNode3"></span>
+                  <span class="helpMiniFlow"></span>
+                </div>
+                <div class="helpMiniLabel" data-i18n="help.data_link.mini.mismatch"></div>
+              </div>
+            </div>
+            <div class="helpPanelDiagram">
+              <div data-i18n="help.panel.data_link_step1"></div>
+              <span class="helpPanelArrow" aria-hidden="true"></span>
+              <div data-i18n="help.panel.data_link_step2"></div>
+              <span class="helpPanelArrow" aria-hidden="true"></span>
+              <div data-i18n="help.panel.data_link_step3"></div>
+            </div>
+          </div>
+          <div class="helpPanel">
+            <div class="helpPanelTitle" data-i18n="help.panel.first_aid_title"></div>
+            <div class="helpPanelBody" data-i18n="help.panel.first_aid_body"></div>
+            <div class="helpMiniGrid helpMiniGridTight">
+              <div class="helpMiniCard">
+                <div class="helpMiniDiagram helpMiniDiagramPulse">
+                  <span class="helpMiniPulse"></span>
+                  <span class="helpMiniPulse helpMiniPulse2"></span>
+                  <span class="helpMiniPulse helpMiniPulse3"></span>
+                </div>
+                <div class="helpMiniLabel" data-i18n="help.first_aid.mini.status"></div>
+              </div>
+              <div class="helpMiniCard">
+                <div class="helpMiniDiagram helpMiniDiagramAlert">
+                  <span class="helpMiniAlert"></span>
+                </div>
+                <div class="helpMiniLabel" data-i18n="help.first_aid.mini.error"></div>
+              </div>
+              <div class="helpMiniCard">
+                <div class="helpMiniDiagram helpMiniDiagramFix">
+                  <span class="helpMiniWrench"></span>
+                  <span class="helpMiniWrench helpMiniWrench2"></span>
+                </div>
+                <div class="helpMiniLabel" data-i18n="help.first_aid.mini.fix"></div>
+              </div>
+            </div>
+            <div class="helpPanelDiagram">
+              <div data-i18n="help.panel.first_aid_step1"></div>
+              <span class="helpPanelArrow" aria-hidden="true"></span>
+              <div data-i18n="help.panel.first_aid_step2"></div>
+              <span class="helpPanelArrow" aria-hidden="true"></span>
+              <div data-i18n="help.panel.first_aid_step3"></div>
+            </div>
+          </div>
+          <div class="helpPanel">
+            <div class="helpPanelTitle" data-i18n="help.panel.results_title"></div>
+            <div class="helpPanelBody" data-i18n="help.panel.results_body"></div>
+            <div class="helpMiniGrid">
+              <div class="helpMiniCard">
+                <div class="helpMiniDiagram">
+                  <span class="helpMiniBand"></span>
+                  <span class="helpMiniLine"></span>
+                  <span class="helpMiniDot"></span>
+                  <span class="helpMiniDot helpMiniDot2"></span>
+                  <span class="helpMiniDot helpMiniDot3"></span>
+                </div>
+                <div class="helpMiniLabel" data-i18n="help.results.mini.trend"></div>
+              </div>
+              <div class="helpMiniCard">
+                <div class="helpMiniDiagram helpMiniDiagramScatter">
+                  <span class="helpMiniDot"></span>
+                  <span class="helpMiniDot helpMiniDot2"></span>
+                  <span class="helpMiniDot helpMiniDot3"></span>
+                  <span class="helpMiniDot helpMiniDot4"></span>
+                </div>
+                <div class="helpMiniLabel" data-i18n="help.results.mini.points"></div>
+              </div>
+              <div class="helpMiniCard">
+                <div class="helpMiniDiagram helpMiniDiagramBars">
+                  <span class="helpMiniBar"></span>
+                  <span class="helpMiniBar helpMiniBar2"></span>
+                  <span class="helpMiniBar helpMiniBar3"></span>
+                </div>
+                <div class="helpMiniLabel" data-i18n="help.results.mini.bars"></div>
+              </div>
+            </div>
+            <div class="helpPanelDiagram">
+              <div data-i18n="help.panel.results_step1"></div>
+              <span class="helpPanelArrow" aria-hidden="true"></span>
+              <div data-i18n="help.panel.results_step2"></div>
+              <span class="helpPanelArrow" aria-hidden="true"></span>
+              <div data-i18n="help.panel.results_step3"></div>
+            </div>
+          </div>
+          <div class="helpPanel">
+            <div class="helpPanelTitle" data-i18n="help.panel.support_title"></div>
+            <div class="helpPanelBody" data-i18n="help.panel.support_body"></div>
+            <div class="helpMiniGrid helpMiniGridTight">
+              <div class="helpMiniCard">
+                <div class="helpMiniDiagram helpMiniDiagramTag">
+                  <span class="helpMiniTag"></span>
+                </div>
+                <div class="helpMiniLabel" data-i18n="help.support.mini.ids"></div>
+              </div>
+              <div class="helpMiniCard">
+                <div class="helpMiniDiagram helpMiniDiagramBundle">
+                  <span class="helpMiniBundle"></span>
+                </div>
+                <div class="helpMiniLabel" data-i18n="help.support.mini.bundle"></div>
+              </div>
+            </div>
+            <div class="helpPanelDiagram">
+              <div data-i18n="help.panel.support_step1"></div>
+              <span class="helpPanelArrow" aria-hidden="true"></span>
+              <div data-i18n="help.panel.support_step2"></div>
+              <span class="helpPanelArrow" aria-hidden="true"></span>
+              <div data-i18n="help.panel.support_step3"></div>
+            </div>
+            <div class="helpArtifactList" aria-label="Support artifacts">
+              <span class="helpArtifact" data-i18n="help.artifact.request_id"></span>
+              <span class="helpArtifact" data-i18n="help.artifact.error_code"></span>
+              <span class="helpArtifact" data-i18n="help.artifact.job_id"></span>
+              <span class="helpArtifact" data-i18n="help.artifact.input_size"></span>
+            </div>
+            <div class="helpActionRow">
+              <a class="helpAction" href="#requestIdWrap" data-i18n="help.action.goto_request"></a>
+              <a class="helpAction" href="#errorBox" data-i18n="help.action.goto_error"></a>
+              <a class="helpAction" href="#resultsCard" data-i18n="help.action.goto_results"></a>
+            </div>
+          </div>
+          <div class="helpPanel">
+            <div class="helpPanelTitle" data-i18n="help.panel.security_title"></div>
+            <div class="helpPanelBody" data-i18n="help.panel.security_body"></div>
+            <div class="helpMiniGrid helpMiniGridTight">
+              <div class="helpMiniCard">
+                <div class="helpMiniDiagram helpMiniDiagramLock">
+                  <span class="helpMiniLock"></span>
+                </div>
+                <div class="helpMiniLabel" data-i18n="help.security.mini.key"></div>
+              </div>
+              <div class="helpMiniCard">
+                <div class="helpMiniDiagram helpMiniDiagramShield">
+                  <span class="helpMiniShield"></span>
+                </div>
+                <div class="helpMiniLabel" data-i18n="help.security.mini.scope"></div>
+              </div>
+            </div>
+            <div class="helpPanelDiagram">
+              <div data-i18n="help.panel.security_step1"></div>
+              <span class="helpPanelArrow" aria-hidden="true"></span>
+              <div data-i18n="help.panel.security_step2"></div>
+              <span class="helpPanelArrow" aria-hidden="true"></span>
+              <div data-i18n="help.panel.security_step3"></div>
+            </div>
+          </div>
+          <div class="helpPanel">
+            <div class="helpPanelTitle" data-i18n="help.panel.quality_title"></div>
+            <div class="helpPanelBody" data-i18n="help.panel.quality_body"></div>
+            <div class="helpPanelDiagram">
+              <div data-i18n="help.panel.quality_step1"></div>
+              <span class="helpPanelArrow" aria-hidden="true"></span>
+              <div data-i18n="help.panel.quality_step2"></div>
+              <span class="helpPanelArrow" aria-hidden="true"></span>
+              <div data-i18n="help.panel.quality_step3"></div>
+            </div>
+          </div>
+        </div>
+        <div class="helpActions" data-density="advanced">
+          <a class="helpAction" href="#dataCard" data-i18n="help.action.start_here"></a>
+          <a class="helpAction" href="#helpSupport" data-i18n="help.action.support_flow"></a>
+        </div>
+        <p class="helpNote" data-i18n="help.note.contact" data-density="advanced"></p>
+        <details class="helpDetails" id="helpInputs" data-density="advanced">
+          <summary data-i18n="help.summary.inputs"></summary>
+          <ol class="helpSteps helpStepsDense">
+            <li data-i18n="help.bullet.format"></li>
+            <li data-i18n="help.bullet.sample"></li>
+            <li data-i18n="help.bullet.validate"></li>
+            <li data-i18n="help.bullet.json_or_csv"></li>
+            <li data-i18n="help.bullet.frequency"></li>
+            <li data-i18n="help.bullet.quantiles"></li>
+            <li data-i18n="help.bullet.min_history"></li>
+            <li data-i18n="help.bullet.results_chart"></li>
+            <li data-i18n="help.bullet.jobs"></li>
+          </ol>
+        </details>
+        <details class="helpDetails" id="helpSupport" data-density="advanced">
+          <summary data-i18n="help.summary.support"></summary>
+          <ol class="helpSteps helpStepsDense">
+            <li data-i18n="help.bullet.request_id"></li>
+            <li data-i18n="help.bullet.copy_error"></li>
+            <li data-i18n="help.bullet.bundle"></li>
+            <li data-i18n="help.bullet.generate"></li>
+            <li data-i18n="help.bullet.bundle_contents"></li>
+            <li data-i18n="help.bullet.support_contact"></li>
+          </ol>
+        </details>
+        <details class="helpDetails" id="helpTroubleshoot">
+          <summary data-i18n="help.summary.troubleshoot"></summary>
+          <ol class="helpSteps helpStepsDense">
+            <li data-i18n="help.trouble.v01"></li>
+            <li data-i18n="help.trouble.v02"></li>
+            <li data-i18n="help.trouble.v03"></li>
+            <li data-i18n="help.trouble.v04"></li>
+            <li data-i18n="help.trouble.v06"></li>
+            <li data-i18n="help.trouble.m01"></li>
+            <li data-i18n="help.trouble.cost01"></li>
+            <li data-i18n="help.trouble.s01"></li>
+          </ol>
+        </details>
+        <details class="helpDetails helpDev" data-density="advanced">
+          <summary data-i18n="help.summary.dev"></summary>
+          <div class="helpDevBody" data-i18n="help.dev.api_relative"></div>
+          <div class="helpArtifactList helpArtifactListDev" aria-label="Developer artifacts">
+            <span class="helpArtifact" data-i18n="help.artifact.endpoint_forecast"></span>
+            <span class="helpArtifact" data-i18n="help.artifact.endpoint_jobs"></span>
+            <span class="helpArtifact" data-i18n="help.artifact.endpoint_result"></span>
+            <span class="helpArtifact" data-i18n="help.artifact.error_schema"></span>
+          </div>
+          <div class="helpActionRow">
+            <a class="helpAction" href="/docs" data-i18n="help.action.goto_docs"></a>
+            <a class="helpAction" href="#helpInputs" data-i18n="help.action.goto_inputs"></a>
+          </div>
+          <ol class="helpSteps helpStepsDense">
+            <li data-i18n="help.dev.endpoints"></li>
+            <li data-i18n="help.dev.auth"></li>
+            <li data-i18n="help.dev.errors"></li>
+            <li data-i18n="help.dev.jobs"></li>
+            <li data-i18n="help.dev.examples"></li>
+          </ol>
+        </details>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <div class="wrap">
+        <span class="muted" data-i18n="hint.footer_note"></span>
+      </div>
+    </footer>
+
+    <script type="module" src="./app.js?v=20260217-11"></script>
+  </body>
+</html>

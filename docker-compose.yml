@@ -1,0 +1,107 @@
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      RULFM_FORECASTING_API_KEY: ${RULFM_FORECASTING_API_KEY:?set RULFM_FORECASTING_API_KEY}
+      RULFM_FORECASTING_API_BEARER_TOKEN: ${RULFM_FORECASTING_API_BEARER_TOKEN:-local-metrics-token}
+      RULFM_JOB_EXECUTION_BACKEND: worker
+      RULFM_METRICS_ENABLED: ${RULFM_METRICS_ENABLED:-1}
+      RULFM_PROMETHEUS_MULTIPROC_DIR: /tmp/prometheus
+      RULFM_MODEL_REGISTRY_DB_PATH: /app/runtime/trained_models.db
+      RULFM_MODEL_ARTIFACTS_ROOT: /app/runtime/model_artifacts
+      RULFM_FORECASTING_API_AUDIT_LOG_PATH: /app/runtime/request_audit_log.jsonl
+      RULFM_DRIFT_BASELINE_PATH: /app/runtime/drift_baseline.json
+      RULFM_MODEL_PROMOTION_REGISTRY_PATH: /app/runtime/model_promotions.json
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./runtime:/app/runtime
+
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      RULFM_FORECASTING_API_KEY: ${RULFM_FORECASTING_API_KEY:?set RULFM_FORECASTING_API_KEY}
+      RULFM_FORECASTING_API_BEARER_TOKEN: ${RULFM_FORECASTING_API_BEARER_TOKEN:-local-metrics-token}
+      RULFM_JOB_EXECUTION_BACKEND: worker
+      RULFM_JOB_WORKER_MODE: daemon
+      RULFM_JOB_WORKER_MAX_JOBS_PER_RUN: ${RULFM_JOB_WORKER_MAX_JOBS_PER_RUN:-32}
+      RULFM_MODEL_REGISTRY_DB_PATH: /app/runtime/trained_models.db
+      RULFM_MODEL_ARTIFACTS_ROOT: /app/runtime/model_artifacts
+      RULFM_FORECASTING_API_AUDIT_LOG_PATH: /app/runtime/request_audit_log.jsonl
+      RULFM_DRIFT_BASELINE_PATH: /app/runtime/drift_baseline.json
+      RULFM_MODEL_PROMOTION_REGISTRY_PATH: /app/runtime/model_promotions.json
+      PYTHONPATH: /app/src
+    command:
+      - python
+      - -m
+      - forecasting_api.job_worker
+    volumes:
+      - ./runtime:/app/runtime
+    depends_on:
+      - api
+
+  prometheus:
+    image: prom/prometheus:v3.1.0
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.path=/prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./infra/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    depends_on:
+      - api
+
+  grafana:
+    image: grafana/grafana:11.4.0
+    ports:
+      - "3000:3000"
+    environment:
+      GF_SECURITY_ADMIN_USER: ${GF_SECURITY_ADMIN_USER:?set GF_SECURITY_ADMIN_USER}
+      GF_SECURITY_ADMIN_PASSWORD: ${GF_SECURITY_ADMIN_PASSWORD:?set GF_SECURITY_ADMIN_PASSWORD}
+    volumes:
+      - ./infra/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./infra/grafana/dashboards:/var/lib/grafana/dashboards:ro
+    depends_on:
+      - prometheus
+
+  postgres-test:
+    image: postgres:16-alpine
+    profiles: ["test"]
+    environment:
+      POSTGRES_DB: rulfm_test
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${RULFM_TEST_POSTGRES_PASSWORD:?set RULFM_TEST_POSTGRES_PASSWORD}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d rulfm_test"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+
+  job-store-postgres-test:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    profiles: ["test"]
+    environment:
+      PYTHONPATH: /app/src
+      RULFM_TEST_POSTGRES_DSN: postgresql://postgres:${RULFM_TEST_POSTGRES_PASSWORD:?set RULFM_TEST_POSTGRES_PASSWORD}@postgres-test:5432/rulfm_test
+    command:
+      - python
+      - -m
+      - pytest
+      - --no-cov
+      - -p
+      - no:cacheprovider
+      - tests/integration/test_job_store_postgres.py
+      - tests/integration/test_model_registry_postgres.py
+      - -q
+    volumes:
+      - .:/app
+    depends_on:
+      postgres-test:
+        condition: service_healthy

@@ -1,0 +1,30 @@
+stages:
+  benchmark:
+    cmd: >
+      RULFM_BENCHMARK_STAGE=${benchmark.stage}
+      RULFM_BENCHMARK_GBDT_PRESET=${benchmark.gbdt_preset}
+      RULFM_BENCHMARK_AFNO_TRAINING_HOURS=${benchmark.training_hours}
+      python scripts/build_fd004_benchmark_summary.py
+    deps:
+      - scripts/build_fd004_benchmark_summary.py
+      - src/models/gbdt_pipeline.py
+      - src/forecasting_api/cmapss_fd004.py
+    params:
+      - benchmark.training_hours
+      - benchmark.stage
+      - benchmark.gbdt_preset
+    outs:
+      - src/forecasting_api/data/fd004_benchmark_summary.json
+      - docs/references/fd004_legacy_extract/fd004_benchmark_summary.csv
+  drift_baseline:
+    cmd: PYTHONPATH=src python scripts/build_drift_baseline.py --input src/forecasting_api/data/drift_reference_records.json --output src/forecasting_api/data/drift_baseline.json --bins ${drift.psi_bins} --minimum-samples-per-feature ${drift.minimum_samples_per_feature}
+    deps:
+      - scripts/build_drift_baseline.py
+      - src/monitoring/drift_detector.py
+      - src/forecasting_api/file_store.py
+      - src/forecasting_api/data/drift_reference_records.json
+    params:
+      - drift.psi_bins
+      - drift.minimum_samples_per_feature
+    outs:
+      - src/forecasting_api/data/drift_baseline.json
