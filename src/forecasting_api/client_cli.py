@@ -5,7 +5,7 @@ It is intentionally separate from the NAYF CLI (training/inference entrypoint).
 
 Examples (scheme-free base-url for public-safe docs):
   RULFM_FORECASTING_API_KEY=dev-key \
-        python -m src.rulfm.forecasting_api.client_cli --base-url 127.0.0.1:8000 health
+        PYTHONPATH=src python -m forecasting_api.client_cli --base-url 127.0.0.1:8000 health
 """
 
 from __future__ import annotations
@@ -17,13 +17,13 @@ import sys
 import time
 from typing import Any
 
-from src.rulfm.forecasting_api.client import ApiCallError, ForecastingApiClient, load_json_file
+from forecasting_api.client import ApiCallError, ForecastingApiClient, load_json_file
 
 
 def _print_next_action(cmd: str) -> None:
     cmd_part = f" {cmd}" if cmd else ""
     print(
-        f"次アクション: python -m src.rulfm.forecasting_api.client_cli{cmd_part} --help を確認してください。",
+        f"次アクション: PYTHONPATH=src python -m forecasting_api.client_cli{cmd_part} --help を確認してください。",
         file=sys.stderr,
     )
 
@@ -99,7 +99,7 @@ def main(argv: list[str] | None = None) -> int:
     )
 
     parser = argparse.ArgumentParser(
-        prog="python -m src.rulfm.forecasting_api.client_cli",
+        prog="PYTHONPATH=src python -m forecasting_api.client_cli",
         formatter_class=argparse.RawTextHelpFormatter,
         parents=[common],
         description=(

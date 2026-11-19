@@ -73,7 +73,7 @@ The benchmark and public API are the product surface. The control surface exists
 
 The committed artifact at [src/forecasting_api/data/fd004_benchmark_summary.json](src/forecasting_api/data/fd004_benchmark_summary.json) is the public reference checkpoint.
 
-- evaluation: final-cycle prediction for 237 eligible test engines
+- evaluation: final-cycle prediction for 237 test engines that have at least 30 cycles. Engines with a shorter history are excluded, so this is not the full FD004 test set (about 248 engines) and is not the same protocol as scoring every test engine
 - training profile: full cycles per engine
 - benchmark stage: `gbdt-only`
 - preset: `full`
@@ -308,6 +308,8 @@ The production Terraform path in [infra/terraform/main.tf](infra/terraform/main.
 - Cloud Run service for the API with Cloud SQL and GCS mounts
 - Cloud Run Job for queue draining with `RULFM_JOB_WORKER_MODE=batch`
 - Cloud Scheduler for periodic worker execution
+
+Resource names in `infra/terraform` still use the previous product name `arcayf` (for example `arcayf-forecasting-runtime`). Those identifiers are the deployed names, not a second codebase. Renaming them would change Terraform state addresses.
 
 Typical Terraform inputs:
 

@@ -42,6 +42,12 @@ def test_coverage_90_within_threshold(benchmark_row: dict) -> None:
     assert cov90 >= 0.90, f"cov90 regression: {cov90} < 0.90"
 
 
+def test_cohort_is_not_the_full_fd004_protocol(benchmark_row: dict) -> None:
+    assert benchmark_row.get("comparability") == "window30_eligible_final_cycle"
+    assert "30" in str(benchmark_row.get("scope"))
+    assert benchmark_row.get("comparability") != "same_protocol"
+
+
 def test_bias_within_threshold(benchmark_row: dict) -> None:
     bias = abs(float(benchmark_row.get("bias") or 0.0))
     assert bias <= 5.0, f"bias regression: {bias} > 5.0"
