@@ -42,8 +42,8 @@
       "width90": 60.20116986183352,
       "interval_method": "quantile_boosting_90",
       "source": "fd004_benchmark",
-      "scope": "standard CMAPSS evaluation: final-cycle RUL per engine",
-      "comparability": "same_protocol",
+      "scope": "final-cycle RUL for test engines with at least 30 cycles; shorter engines are excluded",
+      "comparability": "window30_eligible_final_cycle",
       "bias": -2.213037558742268,
       "overprediction_rate": 0.4472573839662447,
       "overprediction_mean": 9.204657710012418,
@@ -137,7 +137,8 @@
       "low_rul_nasa_score_30": "nasa_score restricted to y <= 30",
       "low_rul_nasa_score_60": "nasa_score restricted to y <= 60",
       "cov90": "mean(lower_90 <= y <= upper_90)",
-      "width90": "mean(upper_90 - lower_90)"
+      "width90": "mean(upper_90 - lower_90)",
+      "cohort": "test engines with at least 30 cycles (237 in this snapshot); not the full FD004 test set of about 248"
     }
   },
   "notes": [
@@ -148,6 +149,7 @@
     "Benchmark stage=gbdt-only, gbdt_preset=full, gbdt_ensemble_enabled=False, afno_enabled=False.",
     "Stage matrix: gbdt-only writes the GBDT baseline snapshot and exits; full continues into SOTA stages after persisting the GBDT baseline, with AFNO stages gated behind RULFM_BENCHMARK_ENABLE_AFNO=1.",
     "AFNO benchmark stages are skipped by default in the public full run so the summary artifact can complete deterministically; set RULFM_BENCHMARK_ENABLE_AFNO=1 to opt back in.",
-    "GBDT interval calibration uses heldout_unit_proxy_final_cycle on held-out training units instead of all sliding-window rows."
+    "GBDT interval calibration uses heldout_unit_proxy_final_cycle on held-out training units instead of all sliding-window rows.",
+    "The GBDT row scores 237 engines with at least 30 cycles. It is not the full FD004 test set of about 248, so comparability is window30_eligible_final_cycle rather than the unmodified test protocol."
   ]
 }

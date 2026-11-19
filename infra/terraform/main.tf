@@ -56,6 +56,8 @@ locals {
   )
 }
 
+# Resource addresses keep the previous product name "arcayf".
+# They are deployed identifiers, not a second codebase.
 resource "google_artifact_registry_repository" "arcayf" {
   location      = var.region
   repository_id = var.repository_id

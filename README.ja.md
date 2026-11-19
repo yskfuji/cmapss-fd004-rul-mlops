@@ -59,7 +59,7 @@ NASA CMAPSS FD004 の Remaining Useful Life 予測を題材にした、公開ポ
 
 基準となる artifact は `src/forecasting_api/data/fd004_benchmark_summary.json` としてコミットしている。
 
-- 評価対象: 237 台の対象 test engine の最終サイクル予測
+- 評価対象: 履歴が 30 サイクル以上ある 237 台の最終サイクル予測。それより短い engine は除いている。FD004 のテスト全体（約 248 台）を採点した同じプロトコルではない
 - 学習プロファイル: engine ごとの full cycle
 - ベンチマーク stage: `gbdt-only`
 - preset: `full`

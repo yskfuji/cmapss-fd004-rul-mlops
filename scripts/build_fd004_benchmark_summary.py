@@ -210,7 +210,7 @@ def _build_benchmark_summary(
                     "interval_method": row.get("interval_method"),
                 }
                 for row in rows
-                if row.get("comparability") == "same_protocol"
+                if row.get("comparability") == "window30_eligible_final_cycle"
             ],
             "xai_stability": [],
             "architecture_ablations": [],
@@ -462,8 +462,8 @@ def _afno_benchmark_row(*, label: str, metrics: dict[str, float], afno_meta: dic
         "width90": metrics["width90"],
         "interval_method": "validation_residual_conformal_90",
         "source": "fd004_benchmark",
-        "scope": "standard CMAPSS evaluation: final-cycle RUL per engine",
-        "comparability": "same_protocol",
+        "scope": "final-cycle RUL for test engines with at least 30 cycles; shorter engines are excluded",
+        "comparability": "window30_eligible_final_cycle",
         **_point_diagnostic_row_fields(metrics),
     }
     if afno_meta.get("variant_family") is not None:
@@ -1245,7 +1245,9 @@ def _standard_eval_outputs(
     algo: str | None = None,
     interval_qhat: float | None = None,
 ) -> dict[str, list[float]]:
-    """Standard CMAPSS evaluation: predict RUL at the final cycle of each test engine.
+    """Predict RUL at the final cycle of each test engine that has at least WINDOW records.
+
+    Engines with fewer records are excluded, so this is not the full FD004 test set.
 
     For each engine, the last WINDOW cycles are used as context, and a single
     1-step-ahead prediction is made. The true RUL comes from the y value at the
@@ -3593,8 +3595,8 @@ def _sota_benchmark_row(
         "width90": metrics["width90"],
         "interval_method": "validation_residual_conformal_90",
         "source": "fd004_benchmark",
-        "scope": "standard CMAPSS evaluation: final-cycle RUL per engine",
-        "comparability": "same_protocol",
+        "scope": "final-cycle RUL for test engines with at least 30 cycles; shorter engines are excluded",
+        "comparability": "window30_eligible_final_cycle",
         "variant_family": "sota_comparison",
         **_point_diagnostic_row_fields(metrics),
     }
@@ -3949,7 +3951,7 @@ def main() -> int:
                 f"GBDT interval calibration uses {calibration_protocol} on held-out training units instead of all sliding-window rows."
             )
         experiments["fd004_gbdt_w30_f24"] = {**gbdt_meta, **{f"backtest_{k}": v for k, v in gbdt_metrics.items()}}
-        rows.append({"model": "GBDT_w30_f24", "rmse": gbdt_metrics["rmse"], "mae": gbdt_metrics["mae"], "nasa_score": gbdt_metrics["nasa_score"], "cov90": gbdt_metrics["cov90"], "width90": gbdt_metrics["width90"], "interval_method": gbdt_meta.get("interval_method"), "source": "fd004_benchmark", "scope": "standard CMAPSS evaluation: final-cycle RUL per engine", "comparability": "same_protocol", **_point_diagnostic_row_fields(gbdt_metrics)})
+        rows.append({"model": "GBDT_w30_f24", "rmse": gbdt_metrics["rmse"], "mae": gbdt_metrics["mae"], "nasa_score": gbdt_metrics["nasa_score"], "cov90": gbdt_metrics["cov90"], "width90": gbdt_metrics["width90"], "interval_method": gbdt_meta.get("interval_method"), "source": "fd004_benchmark", "scope": "final-cycle RUL for test engines with at least 30 cycles; shorter engines are excluded", "comparability": "window30_eligible_final_cycle", **_point_diagnostic_row_fields(gbdt_metrics)})
         log_metrics({"gbdt.rmse": gbdt_metrics["rmse"], "gbdt.nasa_score": gbdt_metrics["nasa_score"], "gbdt.cov90": gbdt_metrics["cov90"], "gbdt.width90": gbdt_metrics["width90"]})
 
         gbdt_phase = "gbdt-only" if _benchmark_stage() == "gbdt-only" else "gbdt-baseline"
@@ -4225,8 +4227,8 @@ def main() -> int:
                                     "width90": hybrid_metrics["width90"],
                                     "interval_method": "blended_quantile_and_conformal_90",
                                     "source": "fd004_benchmark",
-                                    "scope": "standard CMAPSS evaluation: final-cycle RUL per engine",
-                                    "comparability": "same_protocol",
+                                    "scope": "final-cycle RUL for test engines with at least 30 cycles; shorter engines are excluded",
+                                    "comparability": "window30_eligible_final_cycle",
                                     **_point_diagnostic_row_fields(hybrid_metrics),
                                 }
                             )
@@ -4316,8 +4318,8 @@ def main() -> int:
                                 row = {
                                     **variant_result["row"],
                                     "source": "fd004_benchmark",
-                                    "scope": "standard CMAPSS evaluation: final-cycle RUL per engine",
-                                    "comparability": "same_protocol",
+                                    "scope": "final-cycle RUL for test engines with at least 30 cycles; shorter engines are excluded",
+                                    "comparability": "window30_eligible_final_cycle",
                                 }
                                 rows.append(row)
                                 soft_gate_main_rows.append(row)
@@ -4370,7 +4372,7 @@ def main() -> int:
                         "interval_method": row.get("interval_method"),
                     }
                     for row in rows
-                    if row.get("comparability") == "same_protocol"
+                    if row.get("comparability") == "window30_eligible_final_cycle"
                 ],
                 "xai_stability": [
                     {
@@ -4379,7 +4381,7 @@ def main() -> int:
                         "afno_occlusion_topk_jaccard": ((row.get("xai_summary") or {}).get("afno_occlusion_topk_jaccard") if isinstance(row.get("xai_summary"), dict) else None),
                     }
                     for row in rows
-                    if row.get("comparability") == "same_protocol"
+                    if row.get("comparability") == "window30_eligible_final_cycle"
                 ],
                 "architecture_ablations": [
                     {
